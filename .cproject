@@ -59,21 +59,6 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="RasPiArduino.cdt.managedbuild.target.gnu.cross.so.513410261" name="Shared Library" projectType="cdt.managedbuild.target.gnu.cross.so"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.release.1216030902;cdt.managedbuild.config.gnu.cross.so.release.1216030902.;cdt.managedbuild.tool.gnu.cross.c.compiler.70945486;cdt.managedbuild.tool.gnu.c.compiler.input.146432719">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.release.1216030902;cdt.managedbuild.config.gnu.cross.so.release.1216030902.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1496338526;cdt.managedbuild.tool.gnu.cpp.compiler.input.1083303899">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.debug.1596457173;cdt.managedbuild.config.gnu.cross.so.debug.1596457173.;cdt.managedbuild.tool.gnu.cross.c.compiler.907046785;cdt.managedbuild.tool.gnu.c.compiler.input.137920464">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.debug.1596457173;cdt.managedbuild.config.gnu.cross.so.debug.1596457173.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.572969618;cdt.managedbuild.tool.gnu.cpp.compiler.input.643131724">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Default">
@@ -85,6 +70,27 @@
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/RasPiArduino"/>
 		</configuration>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.release.1216030902;cdt.managedbuild.config.gnu.cross.so.release.1216030902.;cdt.managedbuild.tool.gnu.cross.c.compiler.70945486;cdt.managedbuild.tool.gnu.c.compiler.input.146432719">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.release.1216030902;cdt.managedbuild.config.gnu.cross.so.release.1216030902.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1496338526;cdt.managedbuild.tool.gnu.cpp.compiler.input.1083303899">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.debug.1596457173.1816507347;cdt.managedbuild.config.gnu.cross.so.debug.1596457173.1816507347.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.354071100;cdt.managedbuild.tool.gnu.cpp.compiler.input.1880144685">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.debug.1596457173;cdt.managedbuild.config.gnu.cross.so.debug.1596457173.;cdt.managedbuild.tool.gnu.cross.c.compiler.907046785;cdt.managedbuild.tool.gnu.c.compiler.input.137920464">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.debug.1596457173.1816507347;cdt.managedbuild.config.gnu.cross.so.debug.1596457173.1816507347.;cdt.managedbuild.tool.gnu.cross.c.compiler.383081404;cdt.managedbuild.tool.gnu.c.compiler.input.1103775284">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.so.debug.1596457173;cdt.managedbuild.config.gnu.cross.so.debug.1596457173.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.572969618;cdt.managedbuild.tool.gnu.cpp.compiler.input.643131724">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 		<buildTargets>
@@ -100,6 +106,38 @@
 				<buildCommand>make</buildCommand>
 				<buildArguments/>
 				<buildTarget>clean</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="install" path="piduino/core" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>install</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="test" path="piduino/core" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>test</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="all" path="examples/blinky" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>all</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="install" path="examples/blinky" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>make</buildCommand>
+				<buildArguments/>
+				<buildTarget>install</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>

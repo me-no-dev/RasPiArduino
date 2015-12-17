@@ -2,6 +2,8 @@
 $(info Current directory is $(PWD))
 CORE    = .
 BUILDDIR = build
+INSTALLDIR = ../../build
+TESTDIR=/mnt/pi/home/src/arduinoBuilds
 
 #piduino libraries location
 LIBRARIES = ../piduino/libraries
@@ -53,3 +55,12 @@ clean:
 	@rm -f $(OUTPUT)
 	
 run: all
+
+install: all
+	@echo "Copying build to install directory $(INSTALLDIR)"
+	@mkdir -p $(INSTALLDIR)/lib $(INSTALLDIR)/include
+	@cp $(CORE)/*.h $(INSTALLDIR)/include
+	@cp $(OUTPUT) $(INSTALLDIR)/lib
+
+test: install
+	cp -r $(INSTALLDIR) $(TESTDIR)

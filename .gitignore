@@ -10,3 +10,4 @@ workspace/registers/.settings/org.eclipse.cdt.core.prefs
 *.o
 *.d
 *.so
+/build/
