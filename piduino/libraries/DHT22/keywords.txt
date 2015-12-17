@@ -1,0 +1,38 @@
+#######################################
+# Syntax Coloring Map For DHT22
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+DHT22	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+readData	KEYWORD2
+getHumidity	KEYWORD2
+getHumidityInt	KEYWORD2
+getTemperatureC	KEYWORD2
+getTemperatureCInt KEYWORD2
+clockReset	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+DHT_ERROR_NONE	LITERAL1
+DHT_BUS_HUNG	LITERAL1
+DHT_ERROR_NOT_PRESENT	LITERAL1
+DHT_ERROR_ACK_TOO_LONG	LITERAL1
+DHT_ERROR_SYNC_TIMEOUT	LITERAL1
+DHT_ERROR_DATA_TIMEOUT	LITERAL1
+DHT_ERROR_CHECKSUM	LITERAL1
+DHT_ERROR_TOOQUICK	LITERAL1
