@@ -10,5 +10,5 @@ blinky: blinky.cpp
 clean:
 	rm -f blinky
 
-test: blinky
+test: clean blinky
 	cp blinky /mnt/pi/home/src/arduinoBuilds

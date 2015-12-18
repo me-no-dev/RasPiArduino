@@ -5,6 +5,9 @@
 #include "pins_arduino.h"
 #include "console.h"
 
+// Forward declarations of static functions
+static void dumpRegisters();
+
 static pthread_mutex_t thread_mutexes[4];
 
 int start_thread(void *(*fn)(void *), void * arg){
@@ -410,9 +413,31 @@ void uninit(){
 }
 
 int init(){
+  //dumpRegisters();
 	if(map_registers((getBoardRev() == 0xa01041)?0x1F000000:0)) return 1;
 	init_pins();
 	srand(time(NULL));
 	analogWriteInit();
 	return 0;
+}
+
+/**
+ * Dump registers.
+ * Dump the register base addresses to stdout.
+ */
+static void dumpRegisters() {
+  printf("BCM2835_BASE       = 0x%x\n", BCM2835_BASE);
+  printf("BCM2835_ST_BASE    = 0x%x\n", BCM2835_ST_BASE);
+  printf("BCM2835_IRQ_BASE   = 0x%x\n", BCM2835_IRQ_BASE);
+  printf("BCM2835_PM_BASE    = 0x%x\n", BCM2835_PM_BASE);
+  printf("BCM2835_CM_BASE    = 0x%x\n", BCM2835_CM_BASE);
+  printf("BCM2835_GPIO_BASE  = 0x%x\n", BCM2835_GPIO_BASE);
+  printf("BCM2835_UART0_BASE = 0x%x\n", BCM2835_UART0_BASE);
+  printf("BCM2835_PCM_BASE   = 0x%x\n", BCM2835_PCM_BASE);
+  printf("BCM2835_SPI0_BASE  = 0x%x\n", BCM2835_SPI0_BASE);
+  printf("BCM2835_BSC0_BASE  = 0x%x\n", BCM2835_BSC0_BASE);
+  printf("BCM2835_PWM_BASE   = 0x%x\n", BCM2835_PWM_BASE);
+  printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
+  printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
+  printf("BCM2835_BSC1_BASE  = 0x%x\n", BCM2835_BSC1_BASE);
 }
