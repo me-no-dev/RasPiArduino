@@ -11,3 +11,5 @@ workspace/registers/.settings/org.eclipse.cdt.core.prefs
 *.d
 *.so
 /build/
+/.cproject
+/.project
