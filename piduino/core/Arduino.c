@@ -261,9 +261,14 @@ uint32_t getBoardRev(){
   char window[5];
   int wi = 0;
   
-  if ((f= fopen("/proc/cmdline", "r"))) {
+  // We must clear the window before use.  Can't assume it is zero.
+  memset(window, 0, sizeof(window));
+
+  if ((f = fopen("/proc/cmdline", "r"))) {
     n = fread(buf, 1, 1023, f);
     fclose(f);
+  } else {
+    printf("Error opening /proc/cmdline\n");
   }
   
   for (i = 0; i < n; ++i) {
@@ -413,8 +418,9 @@ void uninit(){
 }
 
 int init(){
-  //dumpRegisters();
-	if(map_registers((getBoardRev() == 0xa01041)?0x1F000000:0)) return 1;
+  dumpRegisters();
+
+ 	if(map_registers((getBoardRev() == 0xa01041 || getBoardRev() == 0xa21041)?0x1F000000:0)) return 1;
 	init_pins();
 	srand(time(NULL));
 	analogWriteInit();
@@ -426,6 +432,7 @@ int init(){
  * Dump the register base addresses to stdout.
  */
 static void dumpRegisters() {
+  printf("boardRev = 0x%x\n", getBoardRev());
   printf("BCM2835_BASE       = 0x%x\n", BCM2835_BASE);
   printf("BCM2835_ST_BASE    = 0x%x\n", BCM2835_ST_BASE);
   printf("BCM2835_IRQ_BASE   = 0x%x\n", BCM2835_IRQ_BASE);
