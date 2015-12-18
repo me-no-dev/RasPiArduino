@@ -33,19 +33,21 @@
 */
 
 //memory locations for all periferals
-#define BCM2835_ST_BASE     0x20003000 	/* System Timer */
-#define BCM2835_IRQ_BASE    0x2000B000	/* Interrupt control block */
-#define BCM2835_PM_BASE     0x20100000 	/* Power Management, Reset controller and Watchdog registers */
-#define BCM2835_CM_BASE     0x20101000  /* GPIO Clock Registers */
-#define BCM2835_GPIO_BASE   0x20200000 	/* GPIO */
-#define BCM2835_UART0_BASE  0x20201000	/* UART0 */
-#define BCM2835_PCM_BASE    0x20203000 	/* I2S */
-#define BCM2835_SPI0_BASE   0x20204000 	/* SPI0 */
-#define BCM2835_BSC0_BASE   0x20205000 	/* BSC0 I2C/TWI (I2C0)*/
-#define BCM2835_PWM_BASE    0x2020C000  /* PWM Registers */
-#define BCM2835_BSCS_BASE   0x20214000  /* BSC/SPI Slave Registers */
-#define BCM2835_AUX_BASE    0x20215000  /* AUX Registers (UART1, SPI1, SPI2) */
-#define BCM2835_BSC1_BASE   0x20804000 	/* BSC1 I2C/TWI (I2C1)*/
+#define PI2_BCMBASE 0x3f000000
+#define BCM2835_BASE PI2_BCMBASE
+#define BCM2835_ST_BASE     (BCM2835_BASE | 0x00003000) 	/* System Timer */
+#define BCM2835_IRQ_BASE    (BCM2835_BASE | 0x0000B000)	/* Interrupt control block */
+#define BCM2835_PM_BASE     (BCM2835_BASE | 0x00100000) 	/* Power Management, Reset controller and Watchdog registers */
+#define BCM2835_CM_BASE     (BCM2835_BASE | 0x00101000)  /* GPIO Clock Registers */
+#define BCM2835_GPIO_BASE   (BCM2835_BASE | 0x00200000) 	/* GPIO */
+#define BCM2835_UART0_BASE  (BCM2835_BASE | 0x00201000)	/* UART0 */
+#define BCM2835_PCM_BASE    (BCM2835_BASE | 0x00203000) 	/* I2S */
+#define BCM2835_SPI0_BASE   (BCM2835_BASE | 0x00204000) 	/* SPI0 */
+#define BCM2835_BSC0_BASE   (BCM2835_BASE | 0x00205000) 	/* BSC0 I2C/TWI (I2C0)*/
+#define BCM2835_PWM_BASE    (BCM2835_BASE | 0x0020C000)  /* PWM Registers */
+#define BCM2835_BSCS_BASE   (BCM2835_BASE | 0x00214000)  /* BSC/SPI Slave Registers */
+#define BCM2835_AUX_BASE    (BCM2835_BASE | 0x00215000) /* AUX Registers (UART1, SPI1, SPI2) */
+#define BCM2835_BSC1_BASE   (BCM2835_BASE | 0x00804000) 	/* BSC1 I2C/TWI (I2C1)*/
 
 //everything below is available after successful init_registers() call
 
