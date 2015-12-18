@@ -390,6 +390,7 @@ exit:
 void init_pins(){
   uint32_t revision = getBoardRev();
   if(revision == 0xa01041) revision = 0x10;//pi2 has B+ pinout
+  if(revision == 0xa21041) revision = 0x13;//pi2 has B+ pinout
 	uint32_t pinmask = rpi_model_pinmasks[revision];
 	if(!pinmask){
 		printf("Pinmask was not found for revision 0x%08X\n", revision);

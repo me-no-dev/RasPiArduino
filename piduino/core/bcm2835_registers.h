@@ -629,7 +629,7 @@
 #define PITWO_PINMASK    0xFBC6CF9C // GPIO PINS available on PI A/B
 #define PIPLUS_PINMASK   0x0FFFFFFC // GPIO PINS available on PI A+/B+
 
-const static uint32_t rpi_model_pinmasks[0x13] = {
+const static uint32_t rpi_model_pinmasks[] = {
 		0,				// 0x00 Not a board
 		0,				// 0x01 Not a board
 		PIONE_PINMASK,	// 0x02 Model B Revision 1.0
@@ -648,7 +648,8 @@ const static uint32_t rpi_model_pinmasks[0x13] = {
 		PITWO_PINMASK,	// 0x0F Model B Revision 2.0 Mounting holes
 		PIPLUS_PINMASK,	// 0x10 Model B+
 		0xFFFFFFFF,		// 0x11 Compute Module
-		PIPLUS_PINMASK	// 0x12 Model A+
+		PIPLUS_PINMASK,	// 0x12 Model A+
+		PIPLUS_PINMASK // 0x13 Pi 2 Model B
 };
 
 //memory maps holding the registers
