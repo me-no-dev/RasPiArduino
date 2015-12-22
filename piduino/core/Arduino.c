@@ -445,6 +445,5 @@ static void dumpRegisters() {
   printf("BCM2835_BSC0_BASE  = 0x%x\n", BCM2835_BSC0_BASE);
   printf("BCM2835_PWM_BASE   = 0x%x\n", BCM2835_PWM_BASE);
   printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
-  printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
   printf("BCM2835_BSC1_BASE  = 0x%x\n", BCM2835_BSC1_BASE);
 }

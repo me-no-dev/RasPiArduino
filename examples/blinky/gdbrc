@@ -1,0 +1,3 @@
+dir /home/kolban/git/RasPiArduino/piduino/core
+dir /home/kolban/git/RasPiArduino/piduino/core
+target remote raspi:10000
