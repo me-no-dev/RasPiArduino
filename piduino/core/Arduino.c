@@ -5,6 +5,9 @@
 #include "pins_arduino.h"
 #include "console.h"
 
+// Forward declarations of static functions
+static void dumpRegisters();
+
 static pthread_mutex_t thread_mutexes[4];
 
 int start_thread(void *(*fn)(void *), void * arg){
@@ -258,9 +261,14 @@ uint32_t getBoardRev(){
   char window[5];
   int wi = 0;
   
-  if ((f= fopen("/proc/cmdline", "r"))) {
+  // We must clear the window before use.  Can't assume it is zero.
+  memset(window, 0, sizeof(window));
+
+  if ((f = fopen("/proc/cmdline", "r"))) {
     n = fread(buf, 1, 1023, f);
     fclose(f);
+  } else {
+    printf("Error opening /proc/cmdline\n");
   }
   
   for (i = 0; i < n; ++i) {
@@ -390,6 +398,7 @@ exit:
 void init_pins(){
   uint32_t revision = getBoardRev();
   if(revision == 0xa01041) revision = 0x10;//pi2 has B+ pinout
+  if(revision == 0xa21041) revision = 0x13;//pi2 has B+ pinout
 	uint32_t pinmask = rpi_model_pinmasks[revision];
 	if(!pinmask){
 		printf("Pinmask was not found for revision 0x%08X\n", revision);
@@ -409,9 +418,33 @@ void uninit(){
 }
 
 int init(){
-	if(map_registers((getBoardRev() == 0xa01041)?0x1F000000:0)) return 1;
+  dumpRegisters();
+
+ 	if(map_registers((getBoardRev() == 0xa01041 || getBoardRev() == 0xa21041)?0x1F000000:0)) return 1;
 	init_pins();
 	srand(time(NULL));
 	analogWriteInit();
 	return 0;
+}
+
+/**
+ * Dump registers.
+ * Dump the register base addresses to stdout.
+ */
+static void dumpRegisters() {
+  printf("boardRev = 0x%x\n", getBoardRev());
+  printf("BCM2835_BASE       = 0x%x\n", BCM2835_BASE);
+  printf("BCM2835_ST_BASE    = 0x%x\n", BCM2835_ST_BASE);
+  printf("BCM2835_IRQ_BASE   = 0x%x\n", BCM2835_IRQ_BASE);
+  printf("BCM2835_PM_BASE    = 0x%x\n", BCM2835_PM_BASE);
+  printf("BCM2835_CM_BASE    = 0x%x\n", BCM2835_CM_BASE);
+  printf("BCM2835_GPIO_BASE  = 0x%x\n", BCM2835_GPIO_BASE);
+  printf("BCM2835_UART0_BASE = 0x%x\n", BCM2835_UART0_BASE);
+  printf("BCM2835_PCM_BASE   = 0x%x\n", BCM2835_PCM_BASE);
+  printf("BCM2835_SPI0_BASE  = 0x%x\n", BCM2835_SPI0_BASE);
+  printf("BCM2835_BSC0_BASE  = 0x%x\n", BCM2835_BSC0_BASE);
+  printf("BCM2835_PWM_BASE   = 0x%x\n", BCM2835_PWM_BASE);
+  printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
+  printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
+  printf("BCM2835_BSC1_BASE  = 0x%x\n", BCM2835_BSC1_BASE);
 }
