@@ -6,3 +6,10 @@ workspace/registers/.project
 workspace/registers/.settings/language.settings.xml
 
 workspace/registers/.settings/org.eclipse.cdt.core.prefs
+
+*.o
+*.d
+*.so
+/build/
+/.cproject
+/.project
