@@ -13,3 +13,5 @@ workspace/registers/.settings/org.eclipse.cdt.core.prefs
 /build/
 /.cproject
 /.project
+
+/arm-none-linux-gnueabi
