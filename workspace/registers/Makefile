@@ -1,16 +1,18 @@
+#ssh auth for uploading 
+SSHUSR = pi
+SSHHST = pi2.home
+SSHDST = /home/pi
+
 #toolchain location
 TCPATH     = ../../arm-none-linux-gnueabi
 TCINCLUDES = -I$(TCPATH)/arm-none-linux-gnueabi/include
 TCLIBS     = -L$(TCPATH)/arm-none-linux-gnueabi/lib
 BINPRE     = $(TCPATH)/bin/arm-none-linux-gnueabi-
+
 #piduino core location
 CORE    = ../../piduino/core
 #piduino libraries location
 LIBRARIES = ../../piduino/libraries
-#ssh auth for uploading 
-SSHUSR = pi
-SSHHST = pi2.home
-SSHDST = /home/pi
 
 #dir to use for build temp
 OBJDIR = .build
@@ -67,7 +69,7 @@ CFLAGS = $(DEBUG) -MD -Wall -Winline -pipe $(INCLUDE)
 LDFLAGS= $(TCLIBS)
 LDLIBS = -lpthread -lm
 
-all: info $(OUTPUT) upload
+all: info $(OUTPUT)
 
 info:
 	@echo "USEDLIBS  : $(USEDLIBS)"
