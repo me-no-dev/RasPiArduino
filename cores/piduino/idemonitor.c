@@ -78,17 +78,24 @@ size_t idemonitor_available(){
 }
 
 size_t idemonitor_read(char *buf, size_t len){
+  int i;
   len = (len > _rx_fill)?_rx_fill:len;
-  memcpy(buf, _rx_buffer, len);
-  memmove(_rx_buffer, _rx_buffer+len, len);
+  for(i = 0; i < len; i++){
+    buf[i] = _rx_buffer[i];
+    _rx_buffer[i] = _rx_buffer[i+len];
+    _rx_fill--;
+  }
   return len;
 }
 
 int idemonitor_read_char(){
+  int i;
   if(!_rx_fill)
     return -1;
   char r = (char)_rx_buffer[0];
-  memmove(_rx_buffer, _rx_buffer+1, 1);
+  _rx_fill--;
+  for(i = 0; i < _rx_fill; i++)
+    _rx_buffer[i] = _rx_buffer[i+1];
   return r;
 }
 
@@ -98,6 +105,6 @@ int idemonitor_peek(){
   return (char)_rx_buffer[0];
 }
 
-int idemonitor_flush(){
+void idemonitor_flush(){
   _rx_fill = 0;
 }

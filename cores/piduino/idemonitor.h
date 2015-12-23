@@ -15,7 +15,7 @@ size_t idemonitor_available();
 size_t idemonitor_read(char *buf, size_t len);
 int idemonitor_read_char();
 int idemonitor_peek();
-int idemonitor_flush();
+void idemonitor_flush();
 
 #ifdef __cplusplus
 }
