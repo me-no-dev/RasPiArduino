@@ -1,14 +1,14 @@
-#ifndef LINUX_CONSOLE_H
-#define LINUX_CONSOLE_H
+#ifndef HardwareSerial_h
+#define HardwareSerial_h
 
 #include "Stream.h"
 
-class LinuxConsole : public Stream{
+class HardwareSerial : public Stream{
   protected:
     
   public:
-    inline LinuxConsole(){}
-  	void begin();
+    inline HardwareSerial(){}
+    void begin(uint32_t baud);
     void end();
     virtual int available(void);
     virtual int peek(void);
@@ -23,6 +23,6 @@ class LinuxConsole : public Stream{
     operator bool() { return true; }
 };
 
-extern LinuxConsole Console;
+extern HardwareSerial Serial;
 
 #endif

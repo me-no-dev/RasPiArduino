@@ -111,88 +111,88 @@ void TwoWire::end(void){
 }
 
 void TwoWire::setClock(uint32_t frequency){
-	if(bsc1_is_busy) return;
-	BSC1DIV = BSCF2DIV(frequency);
+  if(bsc1_is_busy) return;
+  BSC1DIV = BSCF2DIV(frequency);
 }
 
 uint8_t TwoWire::send(uint8_t address, uint8_t *data, uint8_t len){
-	while(bsc1_is_busy);
-	bsc1_is_busy = 1;
-	uint8_t result = twi_writeTo(address, data, len, 0, true);
-	bsc1_is_busy = 0;
-	return result;
+  while(bsc1_is_busy);
+  bsc1_is_busy = 1;
+  uint8_t result = twi_writeTo(address, data, len, 0, true);
+  bsc1_is_busy = 0;
+  return result;
 }
 
 uint8_t TwoWire::receive(uint8_t address, uint8_t *data, uint8_t len){
-	while(bsc1_is_busy);
-	bsc1_is_busy = 1;
-	uint8_t result = twi_readFrom(address, data, len, true);
-	bsc1_is_busy = 0;
-	return result;
+  while(bsc1_is_busy);
+  bsc1_is_busy = 1;
+  uint8_t result = twi_readFrom(address, data, len, true);
+  bsc1_is_busy = 0;
+  return result;
 }
 
 uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop){
-	if(quantity > BUFFER_LENGTH) quantity = BUFFER_LENGTH;
-	uint8_t read = receive(address, rxBuffer, quantity);
-	rxBufferIndex = 0;
-	rxBufferLength = (read == 0)?quantity:0;
-	return (read == 0)?quantity:0;
+  if(quantity > BUFFER_LENGTH) quantity = BUFFER_LENGTH;
+  uint8_t read = receive(address, rxBuffer, quantity);
+  rxBufferIndex = 0;
+  rxBufferLength = (read == 0)?quantity:0;
+  return (read == 0)?quantity:0;
 }
 
 void TwoWire::beginTransmission(uint8_t address){
-	while(bsc1_is_busy);
-	bsc1_is_busy = 1;
-	txAddress = address;
-	txBufferIndex = 0;
-	txBufferLength = 0;
+  while(bsc1_is_busy);
+  bsc1_is_busy = 1;
+  txAddress = address;
+  txBufferIndex = 0;
+  txBufferLength = 0;
 }
 
 uint8_t TwoWire::endTransmission(uint8_t sendStop){
-	bsc1_is_busy = 0;
-	uint8_t ret = send(txAddress, txBuffer, txBufferLength);
-	txBufferIndex = 0;
-	txBufferLength = 0;
-	return ret;
+  bsc1_is_busy = 0;
+  uint8_t ret = send(txAddress, txBuffer, txBufferLength);
+  txBufferIndex = 0;
+  txBufferLength = 0;
+  return ret;
 }
 
 uint8_t TwoWire::endTransmission(void){
-	return endTransmission(true);
+  return endTransmission(true);
 }
 
 size_t TwoWire::write(uint8_t data){
-	if(txBufferLength >= BUFFER_LENGTH) return 0;
-	txBuffer[txBufferIndex] = data;
-	++txBufferIndex;
-	txBufferLength = txBufferIndex;
-	return 1;
+  if(txBufferLength >= BUFFER_LENGTH) return 0;
+  txBuffer[txBufferIndex] = data;
+  ++txBufferIndex;
+  txBufferLength = txBufferIndex;
+  return 1;
 }
 
 size_t TwoWire::write(const uint8_t *data, size_t quantity){
-	for(size_t i = 0; i < quantity; ++i){
-		write(data[i]);
-	}
-	return quantity;
+  for(size_t i = 0; i < quantity; ++i){
+    write(data[i]);
+  }
+  return quantity;
 }
 
 int TwoWire::available(void){
-	return rxBufferLength - rxBufferIndex;
+  return rxBufferLength - rxBufferIndex;
 }
 
 int TwoWire::read(void){
-	int value = -1;
-	if(rxBufferIndex < rxBufferLength){
-		value = rxBuffer[rxBufferIndex];
-		++rxBufferIndex;
-	}
-	return value;
+  int value = -1;
+  if(rxBufferIndex < rxBufferLength){
+    value = rxBuffer[rxBufferIndex];
+    ++rxBufferIndex;
+  }
+  return value;
 }
 
 int TwoWire::peek(void){
-	int value = -1;
-	if(rxBufferIndex < rxBufferLength){
-		value = rxBuffer[rxBufferIndex];
-	}
-	return value;
+  int value = -1;
+  if(rxBufferIndex < rxBufferLength){
+    value = rxBuffer[rxBufferIndex];
+  }
+  return value;
 }
 
 void TwoWire::flush(void){}
@@ -202,27 +202,27 @@ void TwoWire::onReceive( void (*function)(int)){}
 void TwoWire::onRequest( void (*function)(void) ){}
 
 void TwoWire::beginTransmission(int address){
-	beginTransmission((uint8_t)address);
+  beginTransmission((uint8_t)address);
 }
 
 void TwoWire::begin(uint8_t address){
-	begin();
+  begin();
 }
 
 void TwoWire::begin(int address){
-	begin((uint8_t)address);
+  begin((uint8_t)address);
 }
 
 uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity){
-	return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
+  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
 }
 
 uint8_t TwoWire::requestFrom(int address, int quantity){
-	return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
+  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
 }
 
 uint8_t TwoWire::requestFrom(int address, int quantity, int sendStop){
-	return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)sendStop);
+  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)sendStop);
 }
 
 TwoWire Wire = TwoWire();

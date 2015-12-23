@@ -1,0 +1,12 @@
+##############################################################
+bplus.name=RaspberryPI B+/2
+
+bplus.upload.tool=scp
+bplus.upload.verbose=
+bplus.upload.speed=115200
+
+bplus.build.mcu=bplus
+bplus.build.f_cpu=700000000L
+bplus.build.board=RASPI
+bplus.build.core=piduino
+bplus.build.variant=bplus

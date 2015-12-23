@@ -4,15 +4,15 @@ SSHHST = pi2.home
 SSHDST = /home/pi
 
 #toolchain location
-TCPATH     = ../../arm-none-linux-gnueabi
+TCPATH     = ../../tools/arm-none-linux-gnueabi
 TCINCLUDES = -I$(TCPATH)/arm-none-linux-gnueabi/include
 TCLIBS     = -L$(TCPATH)/arm-none-linux-gnueabi/lib
 BINPRE     = $(TCPATH)/bin/arm-none-linux-gnueabi-
 
 #piduino core location
-CORE    = ../../piduino/core
-#piduino libraries location
-LIBRARIES = ../../piduino/libraries
+CORE    = ../../cores/piduino
+VARIANT = ../../variants/bplus
+LIBRARIES = ../../libraries
 
 #dir to use for build temp
 OBJDIR = .build
@@ -64,7 +64,7 @@ OBJS = $(COREOBJS) $(LIBOBJS) $(LOCALOBJS)
 DEBUG  = -O3
 CC     = $(BINPRE)gcc
 CPP    = $(BINPRE)g++
-INCLUDE= $(LOCALINCS) $(LIBINCLUDES) -I$(CORE) $(TCINCLUDES)
+INCLUDE= $(LOCALINCS) $(LIBINCLUDES) -I$(CORE) -I$(VARIANT) $(TCINCLUDES)
 CFLAGS = $(DEBUG) -MD -Wall -Winline -pipe $(INCLUDE)
 LDFLAGS= $(TCLIBS)
 LDLIBS = -lpthread -lm

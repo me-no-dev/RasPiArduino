@@ -25,7 +25,7 @@ class Print{
     int getWriteError() { return write_error; }
     void clearWriteError() { setWriteError(0); }
   
-    virtual size_t write(uint8_t) = 0;
+    virtual size_t write(uint8_t){ return 0; }
     virtual size_t write(const uint8_t *buffer, size_t size);
     size_t write(const char *buffer, size_t size) { return write((const uint8_t *)buffer, size); }
     size_t write(const char *str){

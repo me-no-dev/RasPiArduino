@@ -2,18 +2,18 @@
 #include "SPI.h"
 
 void SPIClass::begin() {
-	pinMode(9, ALT0);
-	pinMode(10, ALT0);
-	pinMode(11, ALT0);
-	SPI0CLK = SPI_CLOCK_DIV8;//1MHz
-	SPI0CS = _BV(SPI0CLEAR_RX) | _BV(SPI0CLEAR_TX);
+  pinMode(9, ALT0);
+  pinMode(10, ALT0);
+  pinMode(11, ALT0);
+  SPI0CLK = SPI_CLOCK_DIV8;//1MHz
+  SPI0CS = _BV(SPI0CLEAR_RX) | _BV(SPI0CLEAR_TX);
 }
 
 void SPIClass::end() {
-	pinMode(9, INPUT);
-	pinMode(10, INPUT);
-	pinMode(11, INPUT);
-	SPI0CS = _BV(SPI0CLEAR_RX) | _BV(SPI0CLEAR_TX);
+  pinMode(9, INPUT);
+  pinMode(10, INPUT);
+  pinMode(11, INPUT);
+  SPI0CS = _BV(SPI0CLEAR_RX) | _BV(SPI0CLEAR_TX);
 }
 
 void SPIClass::setDataMode(uint32_t mode){

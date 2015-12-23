@@ -11,9 +11,9 @@ extern "C"{
 
 typedef void * PTHREAD;
 
-#define PWM_DEVIDER 	16
-#define PWM_RANGE   	0xFF
-#define PWM_MODE    	1
+#define PWM_DEVIDER   16
+#define PWM_RANGE     0xFF
+#define PWM_MODE      1
 
 void yield(void);
 
@@ -29,7 +29,7 @@ void yield(void);
 #define ALT4 0x03
 #define ALT5 0x02
 #define INPUT_PULLUP 0x10
-#define INPUT_PULLDOWN 	0x20
+#define INPUT_PULLDOWN   0x20
 
 #define PI 3.1415926535897932384626433832795
 #define HALF_PI 1.5707963267948966192313216916398
@@ -150,8 +150,6 @@ void uart_check_fifos();
 #include "WCharacter.h"
 #include "WString.h"
 #include "HardwareSerial.h"
-#include "SPI.h"
-#include "Wire.h"
 #include "console.h"
 #include "LinuxConsole.h"
 
