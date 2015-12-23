@@ -1,0 +1,20 @@
+#!/bin/bash
+
+SKETCH="/tmp/sketch.bin"
+DESTBIN="/usr/local/bin/arduino-sketch"
+
+LOGFILE="/run/sketch.log"
+BINNAME="arduino-sketch"
+
+PIDS=`ps ax | grep telnet | grep -v grep | awk '{print $1}'`
+for pid in $PIDS; do
+  echo "KILLING: $pid"
+  kill -9 $pid > /dev/null 2>&1
+  sleep 1
+done
+
+killall $BINNAME > /dev/null 2>&1
+mv $SKETCH $DESTBIN
+$DESTBIN >> $LOGFILE 2>&1 &
+
+echo "Sketch Started"

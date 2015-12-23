@@ -1,0 +1,25 @@
+#!/bin/bash
+RUNNING=`ps ax | grep bin/telnet | grep -v grep | wc -l`
+PID=$$
+
+if [ ! -e "/usr/bin/real_telnet" ];then
+  ln -s /usr/bin/telnet /usr/bin/real_telnet
+fi
+
+if [ $RUNNING -gt 2 ]; then
+  PIDS=`ps ax | grep bin/telnet | grep -v grep | awk '{print $1}'`
+  for pid in $PIDS; do
+    if [ $pid -lt $PID ]; then
+      kill -9 $pid > /dev/null 2>&1
+      sleep 1
+    fi
+  done
+fi
+
+RUNNING=`ps ax | grep real_telnet | grep -v grep | wc -l`
+if [ $RUNNING -gt 0 ]; then
+  killall real_telnet > /dev/null 2>&1
+  sleep 1
+fi
+
+real_telnet $@

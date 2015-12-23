@@ -1,0 +1,17 @@
+#!/bin/bash
+
+DESTBIN="/usr/local/bin/arduino-sketch"
+if [ -f "$DESTBIN" ]; then
+  
+  PIDS=`ps ax | grep telnet | grep -v grep | awk '{print $1}'`
+  for pid in $PIDS; do
+    echo "KILLING: $pid"
+    kill -9 $pid > /dev/null 2>&1
+    sleep 1
+  done
+  
+  killall arduino-sketch > /dev/null 2>&1
+  $DESTBIN 2>&1 >> /run/sketch.log &
+else
+  exit 1;
+fi
