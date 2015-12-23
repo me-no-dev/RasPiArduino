@@ -17,6 +17,10 @@ uint8_t _server_running;
 char _rx_buffer[MONITOR_RX_LEN];
 size_t _rx_fill;
 
+uint8_t idemonitor_connected(){
+  return (_server_running && _client_socket > 0);
+}
+
 int idemonitor_begin(){
   _server_running = 0;
   _rx_fill = 0;

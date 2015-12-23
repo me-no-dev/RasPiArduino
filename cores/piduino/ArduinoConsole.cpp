@@ -6,7 +6,7 @@
 
 #include "ArduinoConsole.h"
 #include "idemonitor.h"
-
+/*
 int ArduinoConsole::available(void){
   return idemonitor_available();
 }
@@ -36,6 +36,4 @@ size_t ArduinoConsole::write(uint8_t *data, size_t len){
 }
 
 ArduinoConsole Monitor;
-
-
-
+*/

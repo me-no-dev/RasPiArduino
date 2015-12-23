@@ -1,6 +1,6 @@
 #ifndef IDE_CONSOLE_H
 #define IDE_CONSOLE_H
-
+/*
 #include "Stream.h"
 
 class ArduinoConsole : public Stream {
@@ -24,5 +24,5 @@ class ArduinoConsole : public Stream {
 };
 
 extern ArduinoConsole Monitor;
-
+*/
 #endif

@@ -10,6 +10,7 @@ extern "C" {
 
 void idemonitor_begin(void);
 void idemonitor_run(void);
+uint8_t idemonitor_connected();
 int idemonitor_write(char * data, size_t len);
 size_t idemonitor_available();
 size_t idemonitor_read(char *buf, size_t len);
