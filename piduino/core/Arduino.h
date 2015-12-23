@@ -91,8 +91,8 @@ typedef unsigned int word;
 typedef uint8_t boolean;
 typedef uint8_t byte;
 
-#define micros() (STCV)
-#define millis() (STCV / 1000)
+#define micros() (unsigned long)(STCV)
+#define millis() (unsigned long)(STCV / 1000)
 #define delay(m) nap(m * 1000)
 #define delayMicroseconds(m) (m>450)?nap(m):halt(m)
 
