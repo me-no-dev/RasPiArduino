@@ -23,7 +23,7 @@ LOCALUSEDLIBS   = $(filter $(notdir $(wildcard $(LIBRARIES)/*)), $(shell sed -ne
 USEDLIBDIRS= $(wildcard $(patsubst %,$(LIBRARIES)/%,$(LOCALUSEDLIBS)))
 
 LIBINCALL  = $(foreach lib, $(USEDLIBDIRS), $(call get_library_files,$(lib),h) $(call get_library_files,$(lib),c) $(call get_library_files,$(lib),cpp))
-LIBINCUSD  = $(filter $(notdir $(wildcard $(LIBRARIES)/*)), $(shell sed -ne 's/^ *\# *include *[<\"]\(.*\)\.h[>\"]/\1/p' $(LIBINCALL)))
+LIBINCUSD  = $(if $(LIBINCALL), $(filter $(notdir $(wildcard $(LIBRARIES)/*)), $(shell sed -ne 's/^ *\# *include *[<\"]\(.*\)\.h[>\"]/\1/p' $(LIBINCALL))))
 
 #all libs that have been found to be used
 USEDLIBS   = $(sort $(LIBINCUSD) $(LOCALUSEDLIBS))
