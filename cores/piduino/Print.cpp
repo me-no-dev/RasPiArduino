@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdarg.h>
 #include <math.h>
 #include "Arduino.h"
 
@@ -14,12 +17,21 @@ size_t Print::write(const uint8_t *buffer, size_t size){
   return n;
 }
 
+size_t Print::printf(const char *format, ...) {
+  va_list arg;
+  va_start(arg, format);
+  char temp[4096];
+  size_t len = vsnprintf(temp, 4096, format, arg);
+  len = print(temp);
+  va_end(arg);
+  return len;
+}
+
 size_t Print::print(const String &s){
   return write(s.c_str(), s.length());
 }
 
-size_t Print::print(const char str[])
-{
+size_t Print::print(const char *str){
   return write(str);
 }
 
@@ -74,6 +86,12 @@ size_t Print::println(void){
 }
 
 size_t Print::println(const String &s){
+  size_t n = print(s);
+  n += println();
+  return n;
+}
+
+size_t Print::println(const char *s){
   size_t n = print(s);
   n += println();
   return n;
@@ -158,8 +176,7 @@ size_t Print::printFloat(double number, uint8_t digits) {
   if (number <-4294967040.0) return print ("ovf");  // constant determined empirically
   
   // Handle negative numbers
-  if (number < 0.0)
-  {
+  if (number < 0.0){
      n += print('-');
      number = -number;
   }
@@ -182,8 +199,7 @@ size_t Print::printFloat(double number, uint8_t digits) {
   }
 
   // Extract digits from the remainder one at a time
-  while (digits-- > 0)
-  {
+  while (digits-- > 0){
     remainder *= 10.0;
     int toPrint = int(remainder);
     n += print(toPrint);

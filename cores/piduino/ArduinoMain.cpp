@@ -5,7 +5,7 @@ void *user_code_thread(void *arg){
   setup();
   while(1) {
     loop();
-    nap(500);
+    usleep(500);
   }
   pthread_exit(NULL);
 }
@@ -21,7 +21,7 @@ int main(int argc, char **argv){
     uart_check_fifos();
     idemonitor_run();
     console_run();
-    usleep(100);
+    usleep(200);
   }
   uninit();
     return 0;

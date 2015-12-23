@@ -20,8 +20,9 @@ class Print{
   protected:
     void setWriteError(int err = 1) { write_error = err; }
   public:
-    Print() : write_error(0) {}
-  
+    Print(): write_error(0) {}
+    virtual ~Print(){}
+
     int getWriteError() { return write_error; }
     void clearWriteError() { setWriteError(0); }
   
@@ -33,8 +34,9 @@ class Print{
       return write((const uint8_t *)str, strlen(str));
     }
     
+    size_t printf(const char *format, ...);
     size_t print(const String &);
-    size_t print(const char[]);
+    size_t print(const char*);
     size_t print(char);
     size_t print(unsigned char, int = DEC);
     size_t print(int, int = DEC);
@@ -45,7 +47,7 @@ class Print{
     size_t print(const Printable&);
 
     size_t println(const String &s);
-    size_t println(const char[]);
+    size_t println(const char*);
     size_t println(char);
     size_t println(unsigned char, int = DEC);
     size_t println(int, int = DEC);
