@@ -47,7 +47,8 @@ typedef struct  {
 
 class DS3231 {
   public:
-    DS3231();
+    DS3231(){}
+    ~DS3231(){}
     void begin();
     int  getReg(uint8_t address);
     bool setReg(uint8_t address, uint8_t value);

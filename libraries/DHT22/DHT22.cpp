@@ -11,10 +11,10 @@
 #define DHT22_DATA_BIT_COUNT 41
 
 DHT22::DHT22(uint8_t pin){
-    _bitmask = pin;
-    _lastReadTime = 0;
-    _lastHumidity = DHT22_ERROR_VALUE;
-    _lastTemperature = DHT22_ERROR_VALUE;
+  _bitmask = pin;
+  _lastReadTime = 0;
+  _lastHumidity = DHT22_ERROR_VALUE;
+  _lastTemperature = DHT22_ERROR_VALUE;
 }
 
 //
@@ -52,7 +52,7 @@ DHT22_ERROR_t DHT22::readData(){
       return DHT_BUS_HUNG;
     }
     retryCount++;
-    halt(1);
+    delayMicroseconds(1);
   }
   DIRECT_WRITE_LOW(bitmask);
   DIRECT_MODE_OUTPUT(bitmask);
@@ -64,7 +64,7 @@ DHT22_ERROR_t DHT22::readData(){
     if (retryCount++ > 40){ //20-40us spec
       return DHT_ERROR_NOT_PRESENT;
     }
-    halt(1);
+    delayMicroseconds(1);
   }
   // Find the end of the ACK Pulse
   retryCount = 0;
@@ -72,7 +72,7 @@ DHT22_ERROR_t DHT22::readData(){
     if (retryCount++ > 80) { //80us spec
       return DHT_ERROR_ACK_TOO_LONG;
     }
-    halt(1);
+    delayMicroseconds(1);
   }
   // Read the 40 bit data stream
   for(i = 0; i < DHT22_DATA_BIT_COUNT; i++){
@@ -82,7 +82,7 @@ DHT22_ERROR_t DHT22::readData(){
       if (retryCount++ > 100) {//(Spec is 50 us, 35*2 == 70 us)
         return DHT_ERROR_SYNC_TIMEOUT;
       }
-      halt(1);
+      delayMicroseconds(1);
     }
     // Measure the width of the data pulse
     retryCount = 0;
@@ -90,7 +90,7 @@ DHT22_ERROR_t DHT22::readData(){
       if (retryCount++ > 150) {//(Spec is 80 us, 50*2 == 100 us)
         return DHT_ERROR_DATA_TIMEOUT;
       }
-      halt(1);
+      delayMicroseconds(1);
     }
     bitTimes[i] = retryCount;
   }

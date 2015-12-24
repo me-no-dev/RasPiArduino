@@ -5,8 +5,7 @@
 
 #define DHT22_ERROR_VALUE -995
 
-typedef enum
-{
+typedef enum{
   DHT_ERROR_NONE = 0,
   DHT_BUS_HUNG,
   DHT_ERROR_NOT_PRESENT,
@@ -17,8 +16,7 @@ typedef enum
   DHT_ERROR_TOOQUICK
 } DHT22_ERROR_t;
 
-class DHT22
-{
+class DHT22{
   private:
     uint8_t _bitmask;
     unsigned long _lastReadTime;
@@ -28,8 +26,8 @@ class DHT22
   public:
     DHT22(uint8_t pin);
     DHT22_ERROR_t readData();
-	short int getHumidityInt();
-	short int getTemperatureCInt();
+    short int getHumidityInt();
+    short int getTemperatureCInt();
     float getHumidity();
     float getTemperatureC();
 };
