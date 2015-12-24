@@ -84,7 +84,7 @@ recipe.objcopy.hex.pattern=
 
 ## Save hex
 recipe.output.tmp_file={build.project_name}.hex
-recipe.output.save_file={build.project_name}.{build.variant}.hex
+recipe.output.save_file={build.project_name}.{build.variant}.bin
 
 ## Compute size
 recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.hex"

@@ -94,7 +94,7 @@ typedef uint8_t byte;
 #define micros() (unsigned long)(STCV)
 #define millis() (unsigned long)(STCV / 1000)
 #define delay(m) nap(m * 1000)
-#define delayMicroseconds(m) (m>450)?nap(m):halt(m)
+#define delayMicroseconds(m) do { if(m>450) nap(m); else halt(m); } while(0);
 
 int init(void);
 void uninit(void);

@@ -115,8 +115,6 @@ typedef struct {
 
 static isr_handler_t isr_handlers[64];
 
-static volatile uint64_t isr_reg = 0;
-
 void *isr_executor_task(void *isr_num){
   //elevate_prio(55);
   isr_handler_t *handler = &isr_handlers[(int)isr_num];
@@ -125,6 +123,7 @@ void *isr_executor_task(void *isr_num){
     return 0;
 }
 
+//static volatile uint64_t isr_reg = 0;
 static volatile uint64_t isr_freg = 0;
 static volatile uint64_t isr_rreg = 0;
 
@@ -194,7 +193,7 @@ void detachInterrupt(uint8_t pin) {
       if(pin < 32){
         GPFEN0 = isr_freg & 0xFFFFFFFF;
       } else {
-        GPREN1 = isr_freg >> 32;
+        GPFEN1 = isr_freg >> 32;
       }
     }
     if(handler->mode == RISING|| handler->mode == CHANGE){
@@ -226,11 +225,13 @@ uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
 
   for (i = 0; i < 8; ++i) {
     digitalWrite(clockPin, HIGH);
+    delayMicroseconds(1);
     if (bitOrder == LSBFIRST)
       value |= digitalRead(dataPin) << i;
     else
       value |= digitalRead(dataPin) << (7 - i);
     digitalWrite(clockPin, LOW);
+    delayMicroseconds(1);
   }
   return value;
 }
@@ -245,7 +246,9 @@ void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val){
       digitalWrite(dataPin, !!(val & (1 << (7 - i))));
       
     digitalWrite(clockPin, HIGH);
-    digitalWrite(clockPin, LOW);    
+    delayMicroseconds(1);
+    digitalWrite(clockPin, LOW);
+    delayMicroseconds(1);
   }
 }
 
