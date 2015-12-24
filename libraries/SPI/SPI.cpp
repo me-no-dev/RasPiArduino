@@ -5,7 +5,7 @@ void SPIClass::begin() {
   pinMode(9, ALT0);
   pinMode(10, ALT0);
   pinMode(11, ALT0);
-  SPI0CLK = SPI_CLOCK_DIV8;//1MHz
+  SPI0CLK = SPI0F2DIV(1000000);//1MHz
   SPI0CS = _BV(SPI0CLEAR_RX) | _BV(SPI0CLEAR_TX);
 }
 
@@ -25,6 +25,10 @@ void SPIClass::setClockDivider(uint32_t rate){
   SPI0CLK = rate;
 }
 
+void SPIClass::setClock(uint32_t rate){
+  setClockDivider(SPI0F2DIV(rate));
+}
+
 uint8_t SPIClass::transfer(uint8_t data) {
   SPI0CS |= _BV(SPI0TA) | _BV(SPI0CLEAR_RX) | _BV(SPI0CLEAR_TX);
   SPI0FIFO = data;
@@ -33,11 +37,5 @@ uint8_t SPIClass::transfer(uint8_t data) {
   SPI0CS &= ~_BV(SPI0TA);
   return ret;
 }
-
-void SPIClass::attachInterrupt(){}
-
-void SPIClass::detachInterrupt(){}
-
-void SPIClass::setBitOrder(uint32_t bitOrder){}
 
 SPIClass SPI;

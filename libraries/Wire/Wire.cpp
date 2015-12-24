@@ -195,34 +195,12 @@ int TwoWire::peek(void){
   return value;
 }
 
-void TwoWire::flush(void){}
-
-void TwoWire::onReceive( void (*function)(int)){}
-
-void TwoWire::onRequest( void (*function)(void) ){}
-
-void TwoWire::beginTransmission(int address){
-  beginTransmission((uint8_t)address);
-}
-
 void TwoWire::begin(uint8_t address){
   begin();
 }
 
-void TwoWire::begin(int address){
-  begin((uint8_t)address);
-}
-
 uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity){
-  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
-}
-
-uint8_t TwoWire::requestFrom(int address, int quantity){
-  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)true);
-}
-
-uint8_t TwoWire::requestFrom(int address, int quantity, int sendStop){
-  return requestFrom((uint8_t)address, (uint8_t)quantity, (uint8_t)sendStop);
+  return requestFrom(address, quantity, (uint8_t)true);
 }
 
 TwoWire Wire = TwoWire();
