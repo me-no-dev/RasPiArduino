@@ -11,7 +11,7 @@ extern "C"{
 
 typedef void * PTHREAD;
 
-#define PWM_DEVIDER   16
+#define PWM_DIVIDER   16
 #define PWM_RANGE     0xFF
 #define PWM_MODE      1
 

@@ -6,7 +6,7 @@
 #include "console.h"
 
 // Forward declarations of static functions
-static void dumpRegisters();
+//static void dumpRegisters();
 
 static pthread_mutex_t thread_mutexes[4];
 
@@ -84,7 +84,7 @@ int analogRead(uint8_t pin){
 void analogWriteInit(){
   GPPCTL = GPSRC_OSC + GPCPASS;//stop clock
   while(GPPCTL & _BV(GPBUSY));//wait if running
-  GPPDIV = (PWM_DEVIDER << GPDIVI) | GPCPASS;//set divider
+  GPPDIV = (PWM_DIVIDER << GPDIVI) | GPCPASS;//set divider
   GPPCTL = (1 << GPENAB) | GPSRC_OSC | GPCPASS;//set ctrl
 
   PWMCTL = _BV(PWMMSEN1) | _BV(PWMMSEN2);
@@ -421,8 +421,7 @@ void uninit(){
 }
 
 int init(){
-  dumpRegisters();
-
+  //dumpRegisters();
    if(map_registers((getBoardRev() == 0xa01041 || getBoardRev() == 0xa21041)?0x1F000000:0)) return 1;
   init_pins();
   srand(time(NULL));
@@ -434,6 +433,7 @@ int init(){
  * Dump registers.
  * Dump the register base addresses to stdout.
  */
+/*
 static void dumpRegisters() {
   printf("boardRev = 0x%x\n", getBoardRev());
   printf("BCM2835_BASE       = 0x%x\n", BCM2835_BASE);
@@ -450,3 +450,4 @@ static void dumpRegisters() {
   printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
   printf("BCM2835_BSC1_BASE  = 0x%x\n", BCM2835_BSC1_BASE);
 }
+*/

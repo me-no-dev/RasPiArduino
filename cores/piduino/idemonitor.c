@@ -40,7 +40,7 @@ int idemonitor_begin(){
 
 int idemonitor_write(char * data, size_t len){
   if(!_server_running || _client_socket < 0) return 0;
-  return send(_client_socket, data, len, MSG_DONTWAIT);
+  return send(_client_socket, data, len, 0);//MSG_DONTWAIT);
 }
 
 void idemonitor_run(){

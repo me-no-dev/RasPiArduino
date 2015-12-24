@@ -38,7 +38,7 @@ void LinuxConsole::flush(){
 
 size_t LinuxConsole::write(uint8_t c){
   if(idemonitor_connected())
-    return idemonitor_write((char*)&c, 1);
+    idemonitor_write((char*)&c, 1);
   console_write(c);
   return 1;
 }
