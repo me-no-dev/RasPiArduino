@@ -1,51 +1,29 @@
-
-# ESP8266 platform
-# ------------------------------
-
-# For more info:
-# https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
-
 name=RaspberryPi
 version=0.0.1
 
-runtime.tools.arm-none-linux-gnueabi.path={runtime.platform.path}/tools/arm-none-linux-gnueabi
-runtime.tools.scp.path=scp
+# Toolchain Location
+runtime.tools.toolchain.path={runtime.platform.path}/tools/arm-none-linux-gnueabi
+runtime.tools.toolchain.prefix=arm-none-linux-gnueabi-
 
-compiler.warning_flags=-w
-compiler.warning_flags.none=-w
-compiler.warning_flags.default=
-compiler.warning_flags.more=-Wall
-compiler.warning_flags.all=-Wall -Wextra
+compiler.path={runtime.tools.toolchain.path}/bin/
+compiler.c.cmd={runtime.tools.toolchain.prefix}gcc
+compiler.cpp.cmd={runtime.tools.toolchain.prefix}g++
+compiler.S.cmd={runtime.tools.toolchain.prefix}gcc
+compiler.c.elf.cmd={runtime.tools.toolchain.prefix}g++
+compiler.as.cmd={runtime.tools.toolchain.prefix}as
+compiler.ar.cmd={runtime.tools.toolchain.prefix}ar
+compiler.objcopy.cmd={runtime.tools.toolchain.prefix}objcopy
+compiler.size.cmd={runtime.tools.toolchain.prefix}size
 
-compiler.path={runtime.tools.arm-none-linux-gnueabi.path}/bin/
 compiler.cpreprocessor.flags=
-
-compiler.c.cmd=arm-none-linux-gnueabi-gcc
 compiler.c.flags=-c -O3 -MD -Wall -Winline -pipe
-
-compiler.cpp.cmd=arm-none-linux-gnueabi-g++
 compiler.cpp.flags=-c -O3 -MD -Wall -Winline -pipe
-
-compiler.S.cmd=arm-none-linux-gnueabi-gcc
 compiler.S.flags=-c -g -x assembler-with-cpp -MMD -mlongcalls
-
-compiler.c.elf.cmd=arm-none-linux-gnueabi-g++
+compiler.ar.flags=cru
 compiler.c.elf.flags=
 compiler.c.elf.libs=-lpthread -lm
-
-compiler.as.cmd=arm-none-linux-gnueabi-as
-
-compiler.ar.cmd=arm-none-linux-gnueabi-ar
-compiler.ar.flags=cru
-
-compiler.size.cmd=arm-none-linux-gnueabi-size
-
-compiler.elf2hex.cmd=echo
-compiler.elf2hex.cmd.windows=echo
-compiler.elf2hex.flags=
-
-compiler.scp.cmd=ssh
-compiler.scp.cmd.windows=ssh.exe
+compiler.objcopy.flags=
+compiler.objcopy.eep.flags=
 
 # This can be overriden in boards.txt
 build.extra_flags=-DRASPI
@@ -56,8 +34,8 @@ compiler.c.elf.extra_flags=
 compiler.S.extra_flags=
 compiler.cpp.extra_flags=
 compiler.ar.extra_flags=
+compiler.objcopy.extra_flags=
 compiler.objcopy.eep.extra_flags=
-compiler.elf2hex.extra_flags=
 
 ## Compile c files
 recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.cpreprocessor.flags} {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {compiler.c.extra_flags} {build.extra_flags} {includes} "{source_file}" -o "{object_file}"
@@ -74,13 +52,12 @@ recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compil
 ## Combine gc-sections, archives, and objects
 recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" -o "{build.path}/{build.project_name}.hex" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} -Wl,--start-group {object_files} "{build.path}/arduino.ar" {compiler.c.elf.libs} -Wl,--end-group "-L{build.path}"
 
+## Create hex
+#recipe.objcopy.hex.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.objcopy.flags} {compiler.objcopy.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
+recipe.objcopy.hex.pattern=
+
 ## Create eeprom
 recipe.objcopy.eep.pattern=
-
-## Create hex
-#recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
-#recipe.objcopy.hex.pattern="{compiler.elf2hex.cmd}" "{build.path}/{build.project_name}.bin" "Ready"
-recipe.objcopy.hex.pattern=
 
 ## Save hex
 recipe.output.tmp_file={build.project_name}.hex

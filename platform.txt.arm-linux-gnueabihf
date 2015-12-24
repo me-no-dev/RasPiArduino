@@ -1,51 +1,29 @@
-
-# ESP8266 platform
-# ------------------------------
-
-# For more info:
-# https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification
-
 name=RaspberryPi
 version=0.0.1
 
-runtime.tools.arm-linux-gnueabihf.path={runtime.platform.path}/tools/arm-linux-gnueabihf
-runtime.tools.scp.path=scp
+# Toolchain Location
+runtime.tools.toolchain.path={runtime.platform.path}/tools/arm-linux-gnueabihf
+runtime.tools.toolchain.prefix=arm-linux-gnueabihf-
 
-compiler.warning_flags=-w
-compiler.warning_flags.none=-w
-compiler.warning_flags.default=
-compiler.warning_flags.more=-Wall
-compiler.warning_flags.all=-Wall -Wextra
+compiler.path={runtime.tools.toolchain.path}/bin/
+compiler.c.cmd={runtime.tools.toolchain.prefix}gcc
+compiler.cpp.cmd={runtime.tools.toolchain.prefix}g++
+compiler.S.cmd={runtime.tools.toolchain.prefix}gcc
+compiler.c.elf.cmd={runtime.tools.toolchain.prefix}g++
+compiler.as.cmd={runtime.tools.toolchain.prefix}as
+compiler.ar.cmd={runtime.tools.toolchain.prefix}ar
+compiler.objcopy.cmd={runtime.tools.toolchain.prefix}objcopy
+compiler.size.cmd={runtime.tools.toolchain.prefix}size
 
-compiler.path={runtime.tools.arm-linux-gnueabihf.path}/bin/
 compiler.cpreprocessor.flags=
-
-compiler.c.cmd=arm-linux-gnueabihf-gcc
 compiler.c.flags=-c -O3 -MD -Wall -Winline -pipe
-
-compiler.cpp.cmd=arm-linux-gnueabihf-g++
 compiler.cpp.flags=-c -O3 -MD -Wall -Winline -pipe
-
-compiler.S.cmd=arm-linux-gnueabihf-gcc
 compiler.S.flags=-c -g -x assembler-with-cpp -MMD -mlongcalls
-
-compiler.c.elf.cmd=arm-linux-gnueabihf-g++
+compiler.ar.flags=cru
 compiler.c.elf.flags=
 compiler.c.elf.libs=-lpthread -lm
-
-compiler.as.cmd=arm-linux-gnueabihf-as
-
-compiler.ar.cmd=arm-linux-gnueabihf-ar
-compiler.ar.flags=cru
-
-compiler.size.cmd=arm-linux-gnueabihf-size
-
-compiler.elf2hex.cmd=echo
-compiler.elf2hex.cmd.windows=echo
-compiler.elf2hex.flags=
-
-compiler.scp.cmd=ssh
-compiler.scp.cmd.windows=ssh.exe
+compiler.objcopy.flags=
+compiler.objcopy.eep.flags=
 
 # This can be overriden in boards.txt
 build.extra_flags=-DRASPI
@@ -56,8 +34,8 @@ compiler.c.elf.extra_flags=
 compiler.S.extra_flags=
 compiler.cpp.extra_flags=
 compiler.ar.extra_flags=
+compiler.objcopy.extra_flags=
 compiler.objcopy.eep.extra_flags=
-compiler.elf2hex.extra_flags=
 
 ## Compile c files
 recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.cpreprocessor.flags} {compiler.c.flags} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} {compiler.c.extra_flags} {build.extra_flags} {includes} "{source_file}" -o "{object_file}"
@@ -72,22 +50,21 @@ recipe.S.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.cpreprocessor.fla
 recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{build.path}/arduino.ar" "{object_file}"
 
 ## Combine gc-sections, archives, and objects
-recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" -o "{build.path}/{build.project_name}.bin" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} -Wl,--start-group {object_files} "{build.path}/arduino.ar" {compiler.c.elf.libs} -Wl,--end-group "-L{build.path}"
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" -o "{build.path}/{build.project_name}.hex" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} -Wl,--start-group {object_files} "{build.path}/arduino.ar" {compiler.c.elf.libs} -Wl,--end-group "-L{build.path}"
+
+## Create hex
+#recipe.objcopy.hex.pattern="{compiler.path}{compiler.objcopy.cmd}" {compiler.objcopy.flags} {compiler.objcopy.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
+recipe.objcopy.hex.pattern=
 
 ## Create eeprom
 recipe.objcopy.eep.pattern=
 
-## Create hex
-#recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
-#recipe.objcopy.hex.pattern="{compiler.elf2hex.cmd}" "{build.path}/{build.project_name}.bin" "Ready"
-recipe.objcopy.hex.pattern=
-
 ## Save hex
-recipe.output.tmp_file={build.project_name}.bin
+recipe.output.tmp_file={build.project_name}.hex
 recipe.output.save_file={build.project_name}.{build.variant}.bin
 
 ## Compute size
-recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.bin"
+recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.hex"
 recipe.size.regex=^(?:\.text|\.bss|\.rodata|)\s+([0-9]+).*
 recipe.size.regex.data=^(?:\.data|\.rodata|\.bss)\s+([0-9]+).*
 #recipe.size.regex.eeprom=^(?:\.eeprom)\s+([0-9]+).*
@@ -99,4 +76,4 @@ tools.scp.cmd.windows=echo
 tools.scp.upload.protocol=esp
 tools.scp.upload.params.verbose=-vv
 tools.scp.upload.params.quiet=
-tools.scp.upload.pattern="{cmd}" "Upload" "{build.path}/{build.project_name}.bin"
+tools.scp.upload.pattern="{cmd}" "Upload" "{build.path}/{build.project_name}.hex"
