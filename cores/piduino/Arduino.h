@@ -142,9 +142,16 @@ void loop(void);
 
 void uart_check_fifos();
 
+
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
+// WMath prototypes
+long random(long);
+long random(long, long);
+void randomSeed(unsigned long);
 
 #ifdef __cplusplus
 #include "WCharacter.h"
