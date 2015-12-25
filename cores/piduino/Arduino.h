@@ -153,6 +153,8 @@ long random(long);
 long random(long, long);
 void randomSeed(unsigned long);
 
+#define pgm_read_word(addr) (*(const unsigned short *)(addr))
+
 #ifdef __cplusplus
 #include "WCharacter.h"
 #include "WString.h"
