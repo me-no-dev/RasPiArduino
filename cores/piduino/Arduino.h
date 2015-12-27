@@ -130,6 +130,8 @@ void loop(void);
 
 void uart_check_fifos();
 
+
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
@@ -150,6 +152,9 @@ uint16_t makeWord(byte h, byte l);
 unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout = 1000000L);
 
 // WMath prototypes
+long random(long);
+long random(long, long);
+void randomSeed(unsigned long);
 long map(long, long, long, long, long);
 #endif
 
