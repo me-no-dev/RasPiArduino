@@ -136,7 +136,7 @@ uint8_t TwoWire::requestFrom(uint8_t address, uint8_t quantity, uint8_t sendStop
   uint8_t read = receive(address, rxBuffer, quantity);
   rxBufferIndex = 0;
   rxBufferLength = (read == 0)?quantity:0;
-  return (read == 0)?quantity:0;
+  return rxBufferLength;
 }
 
 void TwoWire::beginTransmission(uint8_t address){
@@ -148,10 +148,10 @@ void TwoWire::beginTransmission(uint8_t address){
 }
 
 uint8_t TwoWire::endTransmission(uint8_t sendStop){
-  bsc1_is_busy = 0;
   uint8_t ret = send(txAddress, txBuffer, txBufferLength);
   txBufferIndex = 0;
   txBufferLength = 0;
+  bsc1_is_busy = 0;
   return ret;
 }
 

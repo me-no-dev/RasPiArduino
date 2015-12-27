@@ -128,18 +128,6 @@ void detachInterrupt(uint8_t);
 void setup(void);
 void loop(void);
 
-#define analogInPinToBit(P) (P)
-
-#define digitalPinToPort(P) (((P)<32)?0:1)
-#define portOutputRegister(P) (((P)<32)?&GPSET0:&GPSET1)
-#define digitalPinToBitMask(P) (P)
-#define digitalPinToTimer(P) ((P==12||P==18)?0:(P==13||P==19)?1:-1)
-
-#define NOT_A_PIN 0
-#define NOT_A_PORT 0
-
-#define NOT_AN_INTERRUPT -1
-
 void uart_check_fifos();
 
 #ifdef __cplusplus
