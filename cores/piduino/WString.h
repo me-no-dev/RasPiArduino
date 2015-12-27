@@ -123,8 +123,5 @@ public:
   StringSumHelper(double num) : String(num) {}
 };
 
-typedef char __FlashStringHelper;
-#define PROGMEM
-
 #endif  // __cplusplus
 #endif  // String_class_h
