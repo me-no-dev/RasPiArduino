@@ -1,6 +1,7 @@
 #include "DS3231.h"
 #include <ctime>
 #include <iostream>
+#include "Wire.h"
 using namespace std;
 
 #define dec2bcd(n) ((n % 10) + ((uint8_t)(n / 10) << 4)) // Convert Decimal to Binary Coded Decimal (BCD)
