@@ -26,7 +26,7 @@ compiler.objcopy.flags=
 compiler.objcopy.eep.flags=
 
 # This can be overriden in boards.txt
-build.extra_flags=-DRASPI
+build.extra_flags=-DRASPI -I"{runtime.platform.path}/tools/compat/include"
 
 # These can be overridden in platform.local.txt
 compiler.c.extra_flags=

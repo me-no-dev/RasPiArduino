@@ -23,10 +23,18 @@
 #define TwoWire_h
 
 #include <inttypes.h>
-#include "Stream.h"
 
-uint8_t twi_writeTo(uint8_t address, const uint8_t * buf, uint32_t len, uint8_t var, uint8_t sendStop);
-uint8_t twi_readFrom(uint8_t address, uint8_t* buf, uint32_t len, uint8_t sendStop);
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+extern uint8_t TWBR;
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#include "Stream.h"
 
 #define BUFFER_LENGTH 32
 
@@ -47,8 +55,6 @@ class TwoWire : public Stream {
     void end();
     void begin(uint8_t);
     void setClock(uint32_t);
-    uint8_t send(uint8_t, uint8_t *, uint8_t);
-    uint8_t receive(uint8_t, uint8_t *, uint8_t);
     void beginTransmission(uint8_t);
     uint8_t endTransmission(void);
     uint8_t endTransmission(uint8_t);

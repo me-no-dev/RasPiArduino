@@ -130,8 +130,6 @@ void loop(void);
 
 void uart_check_fifos();
 
-
-
 #ifdef __cplusplus
 } // extern "C"
 #endif
