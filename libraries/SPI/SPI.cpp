@@ -38,4 +38,10 @@ uint8_t SPIClass::transfer(uint8_t data) {
   return ret;
 }
 
+static void SPIClass::beginTransaction(SPISettings settings){
+  SPI0CLK = SPI0F2DIV(settings.freq);
+  SPI0CS &= ~SPI_MODE3;
+  SPI0CS |= settings.mode;
+}
+
 SPIClass SPI;

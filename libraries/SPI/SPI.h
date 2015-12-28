@@ -18,6 +18,20 @@
 #define SPI_MODE2 SPI0MODE2
 #define SPI_MODE3 SPI0MODE3
 
+class SPISettings {
+public:
+  SPISettings():freq(4000000),mode(SPI_MODE0){}
+  SPISettings(uint32_t clockFreq, uint8_t bitOrder, uint8_t dataMode) {
+    freq = clockFreq;
+    mode = dataMode & SPI0MODE3;
+  }
+private:
+  uint32_t freq;
+  uint8_t mode;
+  friend class SPIClass;
+};
+
+
 class SPIClass {
 public:
   static void begin();
@@ -25,9 +39,11 @@ public:
   static void setDataMode(uint32_t);
   static void setClockDivider(uint32_t);
   static void setClock(uint32_t);
+  static void beginTransaction(SPISettings settings);
   static uint8_t transfer(uint8_t data);
+  inline static void endTransaction(void){}
   //no bit order on the pi
-  static void setBitOrder(uint32_t){}
+  inline static void setBitOrder(uint32_t){}
 };
 
 extern SPIClass SPI;
