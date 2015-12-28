@@ -7,20 +7,22 @@
 #define NOT_A_PORT 0
 #define NOT_AN_INTERRUPT -1
 
-#define EXTERNAL_NUM_INTERRUPTS 32
+#define EXTERNAL_NUM_INTERRUPTS     32
 #define NUM_DIGITAL_PINS            32
 #define NUM_ANALOG_INPUTS           0
 
 #define analogInputToDigitalPin(p)  (-1)
-#define analogInPinToBit(p) 		(p)
+#define analogInPinToBit(p)         (p)
+
+#define digitalPinToPort(p)         (((p)<32)?0:1)
+#define digitalPinToBitMask(p)      (1 << p)
+#define portOutputRegister(p)       ((p)?&GPSET1:&GPSET0)
 
 #define digitalPinHasPWM(p)         ((p) == 12 || (p) == 13 || (p) == 18 || (p) == 19)
-#define digitalPinToPort(p) 		(((p)<32)?0:1)
-#define digitalPinToBitMask(p) 		(p)
-#define digitalPinToInterrupt(p)  	(p)
-#define digitalPinToTimer(p) 		((p==12||p==18)?0:(p==13||p==19)?1:-1)
+#define digitalPinToInterrupt(p)    (p)
+#define digitalPinToTimer(p)        ((p==12||p==18)?0:(p==13||p==19)?1:-1)
 
-#define portOutputRegister(p) 		((p)?&GPSET1:&GPSET0)
+
 
 static const uint8_t ID_SD = 0; //pin 27
 static const uint8_t ID_SC = 1; //pin 28
