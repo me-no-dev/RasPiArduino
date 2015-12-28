@@ -65,7 +65,7 @@ void yield(void);
 #define interrupts()
 #define noInterrupts()
 #define cli()
-#define seu()
+#define sei()
 
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
