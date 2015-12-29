@@ -1,5 +1,5 @@
 /*
-  Arduino.c -  Partial implementation of the Wiring API for the Raspberry Pi
+  Arduino.c -  Registers initialization for Raspberry Pi
   Copyright (c) 2015 Hristo Gochkov.  All right reserved.
 
   This library is free software; you can redistribute it and/or
@@ -20,326 +20,9 @@
 #define ARDUINO_MAIN
 
 #include "Arduino.h"
-#include "bcm2835_registers.h"
-#include "pins_arduino.h"
-#include "console.h"
-
-// Forward declarations of static functions
-//static void dumpRegisters();
-
-static pthread_mutex_t thread_mutexes[4];
-
-int start_thread(void *(*fn)(void *), void * arg){
-    pthread_t myThread ;
-    int fd = pthread_create(&myThread, NULL, fn, arg) ;
-    pthread_detach(myThread);
-    return fd;
-}
-
-int create_thread(void *(*fn)(void *)){
-  return start_thread(fn, NULL);
-}
-
-void lock_thread(int index){
-  pthread_mutex_lock(&thread_mutexes[index]);
-}
-
-void unlock_thread(int index){
-    pthread_mutex_unlock(&thread_mutexes[index]);
-}
-
-int elevate_prio(const int pri){
-  struct sched_param sched ;
-  memset (&sched, 0, sizeof(sched)) ;
-  if (pri > sched_get_priority_max(SCHED_RR)) sched.sched_priority = sched_get_priority_max(SCHED_RR);
-  else sched.sched_priority = pri ;
-  return sched_setscheduler(0, SCHED_RR, &sched) ;
-}
-
-void nap(uint32_t m){
-  usleep(m);
-}
-
-void pinMode(uint8_t pin, uint8_t mode){
-  GPFSEL(pin) &= ~(0x07 << GPFSELB(pin));//clear gpio function
-  GPFSEL(pin) |= ((mode & 0x07) << GPFSELB(pin));//set function to pin
-  if((mode & 0x07) == 0){
-    mode &= 0x30;
-    mode >>= 4;
-    GPPUD = mode;
-    halt(10);
-    if(pin < 32) GPPUDCLK0 = _BV(pin);
-    else if(pin < 46) GPPUDCLK1 = _BV(pin - 32);
-    halt(10);
-    GPPUD = 0;
-    if(pin < 32) GPPUDCLK0 = 0;
-    else if(pin < 46) GPPUDCLK1 = 0;
-  }
-}
-
-void digitalWrite(uint8_t pin, uint8_t val){
-  if(pin < 32){
-    if(val) GPSET0 = _BV(pin);
-    else GPCLR0 = _BV(pin);
-  } else if(pin < 46){
-    if(val) GPSET1 = _BV(pin - 32);
-    else GPCLR1 = _BV(pin - 32);
-  }
-}
-
-int digitalRead(uint8_t pin){
-  if(pin < 32){
-    return (GPLEV0 & _BV(pin)) != 0;
-  } else if(pin > 45) return 0;
-  return (GPLEV1 & _BV(pin - 32)) != 0;
-}
-
+void delayMicroseconds(uint32_t m){ if(m>450) usleep(m); else halt(m); }
 void analogReference(uint8_t mode){}
-
-int analogRead(uint8_t pin){
-  return 0;
-}
-
-static uint32_t _pwm_range = PWM_RANGE;
-static uint32_t _pwm_wanted_freq = 1;
-static uint32_t _pwm_real_freq = 1;
-
-void analogWriteRange(uint32_t range){
-  _pwm_range = range;
-  PWMRNG1 = _pwm_range;
-  PWMRNG2 = _pwm_range;
-}
-
-void analogWriteDiv(uint16_t div){
-  GPPCTL = GPSRC_OSC + GPCPASS;//stop clock
-  while(GPPCTL & _BV(GPBUSY));//wait if running
-  GPPDIV = (div << GPDIVI) | GPCPASS;//set divider
-  GPPCTL = (1 << GPENAB) | GPSRC_OSC | GPCPASS;//set ctrl
-}
-
-uint32_t analogWriteSetup(uint32_t frequency, uint32_t range){
-  _pwm_wanted_freq = frequency;
-  uint32_t div = 19200000/(_pwm_wanted_freq*range);
-  div += (div & 1) * 1;
-  div &= 0xFFF;
-  _pwm_real_freq = 19200000/(div*range);
-  analogWriteRange(range);
-  analogWriteDiv(div);
-  return _pwm_real_freq;
-}
-
-void analogWriteInit(){
-  _pwm_wanted_freq = analogWriteSetup(1000, 256);
-  PWMCTL = _BV(PWMMSEN1) | _BV(PWMMSEN2);
-}
-
-void analogWrite(uint8_t p, uint16_t v){
-  v = ((v*_pwm_real_freq)/_pwm_wanted_freq) % _pwm_range;
-  if(p == 18 || p == 19){
-    pinMode(p, GPF5);
-  } else if(p == 12 || p == 13 || p == 40 || p == 41 || p == 45){
-    pinMode(p, GPF0);
-  }
-  if(p == 12 || p == 18 || p == 40){
-    PWMCTL |= _BV(PWMPWEN1);
-    PWMDAT1 = v;
-  } else if(p == 13 || p == 19 || p == 41 || p == 45){
-    PWMCTL |= _BV(PWMPWEN2);
-    PWMDAT2 = v;
-  }
-}
-
-
-typedef struct {
-  uint8_t mode;
-  void (*fn)(void);
-} isr_handler_t;
-
-static isr_handler_t isr_handlers[64];
-
-void *isr_executor_task(void *isr_num){
-  //elevate_prio(55);
-  isr_handler_t *handler = &isr_handlers[(int)isr_num];
-  handler->fn();
-  pthread_exit(NULL);
-    return 0;
-}
-
-//static volatile uint64_t isr_reg = 0;
-static volatile uint64_t isr_freg = 0;
-static volatile uint64_t isr_rreg = 0;
-
-void isr_check(){
-  if(isr_freg != 0){
-    uint64_t isrfst = GPFEN0;
-    isrfst |= (uint64_t)GPFEN1 << 32;
-    if(isrfst != isr_freg){
-      GPFEN0 = isr_freg;
-      GPFEN1 = isr_freg >> 32;
-      int i = 0;
-      uint32_t changedfbits = isrfst ^ isr_freg;
-      while(changedfbits){
-        while(!(changedfbits & _BV(i))) i++;
-        changedfbits &= ~_BV(i);
-        isr_handler_t *handler = &isr_handlers[i];
-        if((handler->mode == FALLING || handler->mode == CHANGE) && handler->fn) {
-          start_thread(isr_executor_task, (void *)i);
-        }
-      }
-    }
-  }
-  if(isr_rreg != 0){
-    uint64_t isrrst = GPREN0;
-    isrrst |= (uint64_t)GPREN1 << 32;
-    if(isrrst != isr_rreg){
-      GPREN0 = isr_rreg;
-      GPREN1 = isr_rreg >> 32;
-      int i = 0;
-      uint32_t changedrbits = isrrst ^ isr_rreg;
-      while(changedrbits){
-        while(!(changedrbits & _BV(i))) i++;
-        changedrbits &= ~_BV(i);
-        isr_handler_t *handler = &isr_handlers[i];
-        if((handler->mode == RISING || handler->mode == CHANGE) && handler->fn) {
-          start_thread(isr_executor_task, (void *)i);
-        }
-      }
-    }
-  }
-}
-
-void attachInterrupt(uint8_t pin, void (*userFunc)(void), int mode) {
-  if(pin < 46) {
-    isr_handler_t *handler = &isr_handlers[pin];
-    handler->mode = mode;
-    handler->fn = userFunc;
-    if(mode == FALLING || mode == CHANGE){
-      isr_freg |= _BV(pin);
-      if(pin < 32) GPFEN0 = isr_freg & 0xFFFFFFFF;
-      else GPFEN1 = isr_freg >> 32;
-    }
-    if(mode == RISING|| mode == CHANGE){
-      isr_rreg |= _BV(pin);
-      if(pin < 32) GPREN0 = isr_rreg & 0xFFFFFFFF;
-      else GPREN1 = isr_rreg >> 32;
-    }
-  }
-}
-
-void detachInterrupt(uint8_t pin) {
-  if(pin < 46) {
-    isr_handler_t *handler = &isr_handlers[pin];
-    
-    if(handler->mode == FALLING || handler->mode == CHANGE){
-      isr_freg &= ~_BV(pin);
-      if(pin < 32){
-        GPFEN0 = isr_freg & 0xFFFFFFFF;
-      } else {
-        GPFEN1 = isr_freg >> 32;
-      }
-    }
-    if(handler->mode == RISING|| handler->mode == CHANGE){
-      isr_rreg &= ~_BV(pin);
-      if(pin < 32){
-        GPREN0 = isr_rreg & 0xFFFFFFFF;
-      } else {
-        GPREN1 = isr_rreg >> 32;
-      }
-    }   
-    handler->mode = 0;
-    handler->fn = 0;
-  }
-}
-
-unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout){
-  pinMode(pin, INPUT);
-  uint32_t start = micros();
-  while(digitalRead(pin) == state && (micros() - start) < timeout);
-  while(digitalRead(pin) != state && (micros() - start) < timeout);
-  start = micros();
-  while(digitalRead(pin) == state && (micros() - start) < timeout);
-  return micros() - start;
-}
-
-uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
-  uint8_t value = 0;
-  uint8_t i;
-
-  for (i = 0; i < 8; ++i) {
-    digitalWrite(clockPin, HIGH);
-    delayMicroseconds(1);
-    if (bitOrder == LSBFIRST)
-      value |= digitalRead(dataPin) << i;
-    else
-      value |= digitalRead(dataPin) << (7 - i);
-    digitalWrite(clockPin, LOW);
-    delayMicroseconds(1);
-  }
-  return value;
-}
-
-void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val){
-  uint8_t i;
-
-  for (i = 0; i < 8; i++)  {
-    if (bitOrder == LSBFIRST)
-      digitalWrite(dataPin, !!(val & (1 << i)));
-    else  
-      digitalWrite(dataPin, !!(val & (1 << (7 - i))));
-      
-    digitalWrite(clockPin, HIGH);
-    delayMicroseconds(1);
-    digitalWrite(clockPin, LOW);
-    delayMicroseconds(1);
-  }
-}
-
-uint32_t getBoardRev(){
-  FILE* f;
-  char buf[1024];
-  char dest[32];
-  int n = 0;
-  int d = 0;
-  int i;
-  uint32_t revision = 0;
-
-  char window[5];
-  int wi = 0;
-  
-  // We must clear the window before use.  Can't assume it is zero.
-  memset(window, 0, sizeof(window));
-
-  if ((f = fopen("/proc/cmdline", "r"))) {
-    n = fread(buf, 1, 1023, f);
-    fclose(f);
-  } else {
-    printf("Error opening /proc/cmdline\n");
-  }
-  
-  for (i = 0; i < n; ++i) {
-    char c = buf[i];
-    if (strcmp(window, "rev=") == 0) {
-      while (buf[i] != ' ' && buf[i] != 0) {
-        dest[d++] = buf[i++];
-      }
-      dest[d++] = 0;
-      revision = (int)strtol(dest, NULL, 0);
-      return revision;
-    }
-    if (wi < 4) {
-      window[wi++] = c;
-      window[wi] = 0;
-    } else {
-      int win;
-      for (win = 1; win < 4; ++win) window[win-1] = window[win];
-      window[3] = c;
-    }
-  }
-  return revision;
-}
-
-
-
+int analogRead(uint8_t pin){ return 0; }
 
 /*
  * CORE INIT AND CLOSE
@@ -440,18 +123,57 @@ exit:
     return 1;
 }
 
-void init_pins(){
-  uint32_t revision = getBoardRev();
-  if(revision == 0xa01041) revision = 0x10;//pi2 has B+ pinout
-  if(revision == 0xa21041) revision = 0x13;//pi2 has B+ pinout
-  uint32_t pinmask = rpi_model_pinmasks[revision];
-  if(!pinmask){
-    printf("Pinmask was not found for revision 0x%08X\n", revision);
-    return;
+static uint32_t getBoardRev(){
+  FILE* f;
+  char buf[1024];
+  char dest[32];
+  int n = 0;
+  int d = 0;
+  int i;
+  uint32_t revision = 0;
+
+  char window[5];
+  int wi = 0;
+  
+  // We must clear the window before use.  Can't assume it is zero.
+  memset(window, 0, sizeof(window));
+
+  if ((f = fopen("/proc/cmdline", "r"))) {
+    n = fread(buf, 1, 1023, f);
+    fclose(f);
+  } else {
+    fprintf(stderr, "Error opening /proc/cmdline\n");
   }
+  
+  for (i = 0; i < n; ++i) {
+    char c = buf[i];
+    if (strcmp(window, "rev=") == 0) {
+      while (buf[i] != ' ' && buf[i] != 0) {
+        dest[d++] = buf[i++];
+      }
+      dest[d++] = 0;
+      revision = (int)strtol(dest, NULL, 0);
+      return revision;
+    }
+    if (wi < 4) {
+      window[wi++] = c;
+      window[wi] = 0;
+    } else {
+      int win;
+      for (win = 1; win < 4; ++win) window[win-1] = window[win];
+      window[3] = c;
+    }
+  }
+  return revision;
+}
+
+static uint32_t _board_revision = 0;
+
+static void init_pins(){
+  uint32_t pinmask = rpi_model_pinmasks[_board_revision];
   int i;
   for(i=0;i<32;i++){
-    if((pinmask & _BV(i))){
+    if((pinmask & (1 << i))){
       pinMode(i,INPUT);
     }
   }
@@ -463,33 +185,22 @@ void uninit(){
 }
 
 int init(){
-  //dumpRegisters();
-   if(map_registers((getBoardRev() == 0xa01041 || getBoardRev() == 0xa21041)?0x1F000000:0)) return 1;
+  uint32_t revision = getBoardRev();
+  uint32_t offset = ((revision == 0xa01041 || revision == 0xa21041)?0x1F000000:0);
+  if(revision == 0xa01041)
+    revision = 0x10;//pi2 has B+ pinout
+  else if(revision == 0xa21041)
+    revision = 0x13;//pi2 has B+ pinout
+  if(revision >= PINMASKS_LEN)
+    return 1;
+  else
+    fprintf(stderr, "UNKNOWN_REVISION: 0x%08X\n", revision);
+  if(map_registers(offset))
+    return 1;
+  
+  _board_revision = revision;
   init_pins();
   srand(time(NULL));
   analogWriteInit();
   return 0;
 }
-
-/**
- * Dump registers.
- * Dump the register base addresses to stdout.
- */
-/*
-static void dumpRegisters() {
-  printf("boardRev = 0x%x\n", getBoardRev());
-  printf("BCM2835_BASE       = 0x%x\n", BCM2835_BASE);
-  printf("BCM2835_ST_BASE    = 0x%x\n", BCM2835_ST_BASE);
-  printf("BCM2835_IRQ_BASE   = 0x%x\n", BCM2835_IRQ_BASE);
-  printf("BCM2835_PM_BASE    = 0x%x\n", BCM2835_PM_BASE);
-  printf("BCM2835_CM_BASE    = 0x%x\n", BCM2835_CM_BASE);
-  printf("BCM2835_GPIO_BASE  = 0x%x\n", BCM2835_GPIO_BASE);
-  printf("BCM2835_UART0_BASE = 0x%x\n", BCM2835_UART0_BASE);
-  printf("BCM2835_PCM_BASE   = 0x%x\n", BCM2835_PCM_BASE);
-  printf("BCM2835_SPI0_BASE  = 0x%x\n", BCM2835_SPI0_BASE);
-  printf("BCM2835_BSC0_BASE  = 0x%x\n", BCM2835_BSC0_BASE);
-  printf("BCM2835_PWM_BASE   = 0x%x\n", BCM2835_PWM_BASE);
-  printf("BCM2835_BSCS_BASE  = 0x%x\n", BCM2835_BSCS_BASE);
-  printf("BCM2835_BSC1_BASE  = 0x%x\n", BCM2835_BSC1_BASE);
-}
-*/

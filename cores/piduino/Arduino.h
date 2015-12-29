@@ -114,8 +114,8 @@ typedef uint8_t byte;
 
 #define micros() (unsigned long)(STCV)
 #define millis() (unsigned long)(STCV / 1000)
-#define delay(m) nap(m * 1000)
-#define delayMicroseconds(m) do { if(m>450) nap(m); else halt(m); } while(0);
+#define delay(m) usleep(m * 1000)
+void delayMicroseconds(uint32_t m);
 
 int init(void);
 void uninit(void);
@@ -126,15 +126,15 @@ void lock_thread(int index);
 void unlock_thread(int index);
 int elevate_prio(const int prio);
 
-void nap(uint32_t);
-
 void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);//47.5ns direct register write takes 23ns
 int digitalRead(uint8_t);//110ns direct register read takes 74ns
-int analogRead(uint8_t);
+
+int analogRead(uint8_t pin);
 void analogReference(uint8_t mode);
 
 //DIV = 19200000 / (FREQ * RANGE)
+void analogWriteInit();
 uint32_t analogWriteSetup(uint32_t freq, uint32_t range);//returns the freq acheaved
 void analogWrite(uint8_t, uint16_t);//500ns direct register write takes 23ns rest is pin mode and channel enable
 
@@ -164,7 +164,6 @@ void uart_check_fifos();
 #include "HardwareSerial.h"
 #include "console.h"
 #include "LinuxConsole.h"
-//#include "ArduinoConsole.h"
 
 uint16_t makeWord(uint16_t w);
 uint16_t makeWord(byte h, byte l);

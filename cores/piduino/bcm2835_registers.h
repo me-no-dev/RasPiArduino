@@ -653,6 +653,7 @@
 #define PIONE_PINMASK    0x0BC6CF93 // GPIO PINS available on first version PI
 #define PITWO_PINMASK    0xFBC6CF9C // GPIO PINS available on PI A/B
 #define PIPLUS_PINMASK   0x0FFFFFFC // GPIO PINS available on PI A+/B+
+#define PINMASKS_LEN     20
 
 const static uint32_t rpi_model_pinmasks[] = {
     0,        // 0x00 Not a board
