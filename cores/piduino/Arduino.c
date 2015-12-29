@@ -100,18 +100,41 @@ int analogRead(uint8_t pin){
   return 0;
 }
 
-void analogWriteInit(){
-  GPPCTL = GPSRC_OSC + GPCPASS;//stop clock
-  while(GPPCTL & _BV(GPBUSY));//wait if running
-  GPPDIV = (PWM_DIVIDER << GPDIVI) | GPCPASS;//set divider
-  GPPCTL = (1 << GPENAB) | GPSRC_OSC | GPCPASS;//set ctrl
+static uint32_t _pwm_range = PWM_RANGE;
+static uint32_t _pwm_wanted_freq = 1;
+static uint32_t _pwm_real_freq = 1;
 
-  PWMCTL = _BV(PWMMSEN1) | _BV(PWMMSEN2);
-  PWMRNG1 = PWM_RANGE+1;
-  PWMRNG2 = PWM_RANGE+1;
+void analogWriteRange(uint32_t range){
+  _pwm_range = range;
+  PWMRNG1 = _pwm_range;
+  PWMRNG2 = _pwm_range;
 }
 
-void analogWrite(uint8_t p, uint8_t v){
+void analogWriteDiv(uint16_t div){
+  GPPCTL = GPSRC_OSC + GPCPASS;//stop clock
+  while(GPPCTL & _BV(GPBUSY));//wait if running
+  GPPDIV = (div << GPDIVI) | GPCPASS;//set divider
+  GPPCTL = (1 << GPENAB) | GPSRC_OSC | GPCPASS;//set ctrl
+}
+
+uint32_t analogWriteSetup(uint32_t frequency, uint32_t range){
+  _pwm_wanted_freq = frequency;
+  uint32_t div = 19200000/(_pwm_wanted_freq*range);
+  div += (div & 1) * 1;
+  div &= 0xFFF;
+  _pwm_real_freq = 19200000/(div*range);
+  analogWriteRange(range);
+  analogWriteDiv(div);
+  return _pwm_real_freq;
+}
+
+void analogWriteInit(){
+  _pwm_wanted_freq = analogWriteSetup(1000, 256);
+  PWMCTL = _BV(PWMMSEN1) | _BV(PWMMSEN2);
+}
+
+void analogWrite(uint8_t p, uint16_t v){
+  v = ((v*_pwm_real_freq)/_pwm_wanted_freq) % _pwm_range;
   if(p == 18 || p == 19){
     pinMode(p, GPF5);
   } else if(p == 12 || p == 13 || p == 40 || p == 41 || p == 45){
@@ -119,10 +142,10 @@ void analogWrite(uint8_t p, uint8_t v){
   }
   if(p == 12 || p == 18 || p == 40){
     PWMCTL |= _BV(PWMPWEN1);
-    PWMDAT1 = v % (PWM_RANGE+1);
+    PWMDAT1 = v;
   } else if(p == 13 || p == 19 || p == 41 || p == 45){
     PWMCTL |= _BV(PWMPWEN2);
-    PWMDAT2 = v % (PWM_RANGE+1);
+    PWMDAT2 = v;
   }
 }
 

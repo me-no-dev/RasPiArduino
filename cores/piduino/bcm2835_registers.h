@@ -163,11 +163,11 @@
 #define GPFLIP          8 // Invert the clock generator output
 #define GPMASH          9 // 2 bits MASH control (0-3) integer division/1 stage/2 stage/3 stage MASH
 
-#define GPDIVF          0 // 12 bits fractional part of divisor
-#define GPDIVI          12 // 12 bits integer part of divisor
+#define GPDIVF          0 // 12 bits fractional part of divisor 0-4095
+#define GPDIVI          12 // 12 bits integer part of divisor 0-4095
 
-#define GPSRC_GND    0x00 // 0
-#define GPSRC_OSC    0x01 // 19.2 MHz
+#define GPSRC_GND      0x00 // 0
+#define GPSRC_OSC      0x01 // 19.2 MHz
 #define GPSRC_TDBG0    0x02 // 0
 #define GPSRC_TDBG1    0x03 // 0
 #define GPSRC_PLLA    0x04 // 0
@@ -176,9 +176,9 @@
 #define GPSRC_HDMI    0x07 // 216 MHz
 
 #define GPF_OSC      19200000
-#define GPF_PLLC    1000000000
-#define GPF_PLLD    500000000
-#define GPF_HDMI    216000000
+#define GPF_PLLC     1000000000
+#define GPF_PLLD     500000000
+#define GPF_HDMI     216000000
 
 #define GPDIV2F(c,d)  ((c << 12)/d)
 #define GPF2DIV(c,f)  (((c << 12)/f) & 0xFFFFFF)

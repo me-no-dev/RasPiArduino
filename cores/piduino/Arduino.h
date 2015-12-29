@@ -33,7 +33,6 @@ extern "C"{
 
 typedef void * PTHREAD;
 
-#define PWM_DIVIDER   16
 #define PWM_RANGE     0xFF
 #define PWM_MODE      1
 
@@ -134,7 +133,10 @@ void digitalWrite(uint8_t, uint8_t);//47.5ns direct register write takes 23ns
 int digitalRead(uint8_t);//110ns direct register read takes 74ns
 int analogRead(uint8_t);
 void analogReference(uint8_t mode);
-void analogWrite(uint8_t, uint8_t);//500ns direct register write takes 23ns rest is pin mode and channel enable
+
+//DIV = 19200000 / (FREQ * RANGE)
+uint32_t analogWriteSetup(uint32_t freq, uint32_t range);//returns the freq acheaved
+void analogWrite(uint8_t, uint16_t);//500ns direct register write takes 23ns rest is pin mode and channel enable
 
 unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout);
 
