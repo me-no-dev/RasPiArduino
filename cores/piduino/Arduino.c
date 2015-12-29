@@ -191,10 +191,10 @@ int init(){
     revision = 0x10;//pi2 has B+ pinout
   else if(revision == 0xa21041)
     revision = 0x13;//pi2 has B+ pinout
-  if(revision >= PINMASKS_LEN)
-    return 1;
-  else
+  if(revision >= PINMASKS_LEN || !rpi_model_pinmasks[revision]){
     fprintf(stderr, "UNKNOWN_REVISION: 0x%08X\n", revision);
+    return 1;
+  }
   if(map_registers(offset))
     return 1;
   

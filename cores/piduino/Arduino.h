@@ -32,25 +32,23 @@ extern "C"{
 #endif
 
 typedef void * PTHREAD;
-
 #define PWM_RANGE     0xFF
-#define PWM_MODE      1
 
 void yield(void);
 
 #define HIGH 0x1
 #define LOW  0x0
 
-#define INPUT 0x0
-#define OUTPUT 0x1
-#define ALT0 0x04
-#define ALT1 0x05
-#define ALT2 0x06
-#define ALT3 0x07
-#define ALT4 0x03
-#define ALT5 0x02
-#define INPUT_PULLUP 0x10
-#define INPUT_PULLDOWN   0x20
+#define INPUT   0x0
+#define OUTPUT  0x1
+#define ALT0    0x04
+#define ALT1    0x05
+#define ALT2    0x06
+#define ALT3    0x07
+#define ALT4    0x03
+#define ALT5    0x02
+#define INPUT_PULLUP    0x10
+#define INPUT_PULLDOWN  0x20
 
 #define PI 3.1415926535897932384626433832795
 #define HALF_PI 1.5707963267948966192313216916398
