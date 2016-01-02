@@ -17,6 +17,14 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/**
+ * Notes:
+ * Issue #23:
+ * We desire that the Serial output be able to be redirected to the Console.  When a Serial device is created
+ * we check the value of an environment variable called ARDUINO_SERIAL_TO_CONSOLE.  If its value is
+ * either "1" or "true" then we redirect output to the Console.
+ *
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -49,6 +57,16 @@ void uart_check_fifos(){
 }
 
 void HardwareSerial::begin(uint32_t baud){
+  // See if the serial line is being re-mapped to the console.  If it is, we set a flag called
+  // isConsole to be true as an indicator to further Serial calls of our previous determination.
+  char *ARDUINO_SERIAL_TO_CONSOLE = getenv("ARDUINO_SERIAL_TO_CONSOLE");
+  if (ARDUINO_SERIAL_TO_CONSOLE != NULL) {
+    if (strcmp(ARDUINO_SERIAL_TO_CONSOLE, "1") == 0 || strcmp(ARDUINO_SERIAL_TO_CONSOLE, "true") == 0) {
+      isConsole = true;
+      return;
+    }
+  }
+
   uint32_t divider = 12000000/baud;
   pinMode(14, GPF0); // TXD
   pinMode(15, GPF0); // RXD
@@ -59,6 +77,9 @@ void HardwareSerial::begin(uint32_t baud){
 }
 
 void HardwareSerial::end(){
+  if (isConsole) {
+    return;
+  }
   UART0LCRH = 0;
   UART0CR = 0;
   pinMode(14, GPFI); // TXD
@@ -66,14 +87,23 @@ void HardwareSerial::end(){
 }
 
 int HardwareSerial::available(void){
+  if (isConsole) {
+    return Console.available();
+  }
   return uart_rx_buffer_index;
 }
 
 int HardwareSerial::peek(void){
+  if (isConsole) {
+    return Console.peek();
+  }
   return uart_rx_buffer[0];
 }
 
 int HardwareSerial::read(void){
+  if (isConsole) {
+    return Console.read();
+  }
   uint8_t data = uart_rx_buffer[0];
   uart_rx_buffer_index--;
   int i;
@@ -82,17 +112,21 @@ int HardwareSerial::read(void){
 }
 
 void HardwareSerial::flush(){
+  if (isConsole) {
+    Console.flush();
+    return;
+  }
   uart_rx_buffer_index = 0;
   uart_tx_buffer_index = 0;
 }
 
 size_t HardwareSerial::write(uint8_t c){
+  if (isConsole) {
+    return Console.write(c);
+  }
   if(uart_tx_buffer_index < UART_BUFFER_SIZE)
     uart_tx_buffer[uart_tx_buffer_index++] = c;
   return 1;
 }
 
 HardwareSerial Serial;
-
-
-
