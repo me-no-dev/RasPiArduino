@@ -656,8 +656,8 @@
 #define PINMASKS_LEN     20
 
 const static uint32_t rpi_model_pinmasks[] = {
-    0,        // 0x00 Not a board
-    0,        // 0x01 Not a board
+    0,              // 0x00 Not a board
+    0,              // 0x01 Not a board
     PIONE_PINMASK,  // 0x02 Model B Revision 1.0
     PIONE_PINMASK,  // 0x03 Model B Revision 1.0 + ECN0001 (no fuses, D14 removed)
     PITWO_PINMASK,  // 0x04 Model B Revision 2.0 Mounting holes
@@ -666,16 +666,16 @@ const static uint32_t rpi_model_pinmasks[] = {
     PIONE_PINMASK,  // 0x07 Model A Mounting holes
     PIONE_PINMASK,  // 0x08 Model A Mounting holes
     PIONE_PINMASK,  // 0x09 Model A Mounting holes
-    0,        // 0x0A Not a board
-    0,        // 0x0B Not a board
-    0,        // 0x0C Not a board
+    0,              // 0x0A Not a board
+    0,              // 0x0B Not a board
+    0,              // 0x0C Not a board
     PITWO_PINMASK,  // 0x0D Model B Revision 2.0 Mounting holes
     PITWO_PINMASK,  // 0x0E Model B Revision 2.0 Mounting holes
     PITWO_PINMASK,  // 0x0F Model B Revision 2.0 Mounting holes
-    PIPLUS_PINMASK,  // 0x10 Model B+
-    0xFFFFFFFF,    // 0x11 Compute Module
-    PIPLUS_PINMASK,  // 0x12 Model A+
-    PIPLUS_PINMASK // 0x13 Pi 2 Model B
+    PIPLUS_PINMASK, // 0x10 Model B+
+    0xFFFFFFFF,     // 0x11 Compute Module
+    PIPLUS_PINMASK, // 0x12 Model A+
+    PIPLUS_PINMASK  // 0x13 Pi 2 Model B
 };
 
 //memory maps holding the registers
@@ -729,8 +729,10 @@ static inline void border_clr_bit(volatile uint32_t reg, uint8_t bit){
 static inline void halt(uint32_t microseconds){
   uint32_t start = STCLO;
   uint32_t compare = start + microseconds;
-  if(compare < start) while(STCLO - compare);
-    else while(STCLO < compare);
+  if(compare < start)
+    while(STCLO - compare);
+  else
+    while(STCLO < compare);
 }
 
 #ifdef __cplusplus
