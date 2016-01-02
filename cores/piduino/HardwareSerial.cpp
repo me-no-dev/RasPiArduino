@@ -92,10 +92,7 @@ size_t HardwareSerial::write(uint8_t c){
   return 1;
 }
 
-#ifdef SERIAL_TO_CONSOLE
-HardwareSerial Serial1;
-#else
 HardwareSerial Serial;
-#endif
+
 
 

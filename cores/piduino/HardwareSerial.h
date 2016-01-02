@@ -42,11 +42,6 @@ class HardwareSerial : public Stream{
     operator bool() { return true; }
 };
 
-#ifdef SERIAL_TO_CONSOLE
-extern HardwareSerial Serial1;
-#define Serial Console
-#else
 extern HardwareSerial Serial;
-#endif
 
 #endif
