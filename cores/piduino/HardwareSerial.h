@@ -24,9 +24,11 @@
 
 class HardwareSerial : public Stream{
   protected:
+    // True if the serial line is being re-mapped to the console.
+    bool isConsole;
     
   public:
-    inline HardwareSerial(){}
+    inline HardwareSerial(){ isConsole = 0; }
     void begin(uint32_t baud);
     void end();
     virtual int available(void);
