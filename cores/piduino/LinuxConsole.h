@@ -28,6 +28,7 @@ class LinuxConsole : public Stream{
   public:
     inline LinuxConsole(){}
     void begin();
+    inline void begin(uint32_t baud){}
     void end();
     virtual int available(void);
     virtual int peek(void);

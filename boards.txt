@@ -1,3 +1,4 @@
+menu.SerialDestination=Serial to Console
 ##############################################################
 bplus.name=RaspberryPI B+/2
 
@@ -10,3 +11,8 @@ bplus.build.f_cpu=700000000L
 bplus.build.board=RASPI
 bplus.build.core=piduino
 bplus.build.variant=bplus
+
+bplus.menu.SerialDestination.disabled=Disabled
+bplus.menu.SerialDestination.disabled.build.extra_flags=-DRASPI
+bplus.menu.SerialDestination.enabled=Enabled
+bplus.menu.SerialDestination.enabled.build.extra_flags=-DRASPI -DSERIAL_TO_CONSOLE
