@@ -15,7 +15,7 @@ compiler.ar.cmd={runtime.tools.toolchain.prefix}ar
 compiler.objcopy.cmd={runtime.tools.toolchain.prefix}objcopy
 compiler.size.cmd={runtime.tools.toolchain.prefix}size
 
-compiler.cpreprocessor.flags=
+compiler.cpreprocessor.flags=-I"{runtime.platform.path}/tools/compat/include"
 compiler.c.flags=-c -O3 -MD -Wall -Winline -pipe
 compiler.cpp.flags=-c -O3 -MD -Wall -Winline -pipe
 compiler.S.flags=-c -g -x assembler-with-cpp -MMD -mlongcalls
@@ -26,7 +26,7 @@ compiler.objcopy.flags=
 compiler.objcopy.eep.flags=
 
 # This can be overriden in boards.txt
-build.extra_flags=-DRASPI -I"{runtime.platform.path}/tools/compat/include"
+build.extra_flags=-DRASPI
 
 # These can be overridden in platform.local.txt
 compiler.c.extra_flags=
