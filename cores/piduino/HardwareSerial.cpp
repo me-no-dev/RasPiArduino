@@ -28,24 +28,20 @@
 #define UART_BUFFER_SIZE 1024
 
 volatile char uart_rx_buffer[UART_BUFFER_SIZE];
-volatile char uart_tx_buffer[UART_BUFFER_SIZE];
 volatile int uart_rx_buffer_index = 0;
-volatile int uart_tx_buffer_index = 0;
-volatile uint8_t uart_thread_running = 0;
 
 //called by the interrupt check thread
 void uart_check_fifos(){
   if((UART0CR & _BV(UART0EN)) != 0){
     while((UART0FR & _BV(UART0RXFE)) == 0 && uart_rx_buffer_index < UART_BUFFER_SIZE)
       uart_rx_buffer[uart_rx_buffer_index++] = UART0DR;
-    while(uart_tx_buffer_index && (UART0FR & _BV(UART0TXFF)) == 0) {
-      uint8_t data = uart_tx_buffer[0];
-      uart_tx_buffer_index--;
-      int i;
-      for(i = 0; i < uart_tx_buffer_index; i++) uart_tx_buffer[i] = uart_tx_buffer[i+1];
-      UART0DR = data;
-    }
   }
+}
+
+size_t HardwareSerial::write(uint8_t c){
+  while(UART0FR & _BV(UART0TXFF));
+  UART0DR = c;
+  return 1;
 }
 
 void HardwareSerial::begin(uint32_t baud){
@@ -83,13 +79,6 @@ int HardwareSerial::read(void){
 
 void HardwareSerial::flush(){
   uart_rx_buffer_index = 0;
-  uart_tx_buffer_index = 0;
-}
-
-size_t HardwareSerial::write(uint8_t c){
-  if(uart_tx_buffer_index < UART_BUFFER_SIZE)
-    uart_tx_buffer[uart_tx_buffer_index++] = c;
-  return 1;
 }
 
 #ifdef SERIAL_TO_CONSOLE

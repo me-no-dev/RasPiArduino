@@ -15,3 +15,5 @@ workspace/registers/.settings/org.eclipse.cdt.core.prefs
 /.project
 
 /tools/arm-none-linux-gnueabi
+
+tools/arm-none-linux-gnueabi-old
