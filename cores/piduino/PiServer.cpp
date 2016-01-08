@@ -70,6 +70,7 @@ void PiServer::begin(){
 
 void PiServer::end(){
   close(sockfd);
+  sockfd = -1;
   _listening = false;
 }
 

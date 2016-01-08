@@ -128,7 +128,7 @@ unsigned char String::concat(const char *cstr, unsigned int length){
   if (length == 0) return 1;
   if (!reserve(newlen)) return 0;
   strcpy(buffer + len, cstr);
-  len = newlen;
+  len = strlen(buffer);
   return 1;
 }
 

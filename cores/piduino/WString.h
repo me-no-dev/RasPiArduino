@@ -40,7 +40,7 @@ public:
   ~String(void);
 
   unsigned char reserve(unsigned int size);
-  inline unsigned int length(void) const {return len;}
+  inline unsigned int length(void) const {return strlen(buffer);}
 
   String & operator = (const String &rhs);
   String & operator = (const char *cstr);

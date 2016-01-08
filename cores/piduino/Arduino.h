@@ -164,6 +164,7 @@ void uart_check_fifos();
 #include "HardwareSerial.h"
 #include "console.h"
 #include "LinuxConsole.h"
+#include "ShellExec.h"
 
 uint16_t makeWord(uint16_t w);
 uint16_t makeWord(byte h, byte l);

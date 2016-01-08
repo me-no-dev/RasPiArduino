@@ -24,18 +24,17 @@
 #include "Arduino.h"
 
 #include "HardwareSerial.h"
+#include "cbuf.h"
+
 
 #define UART_BUFFER_SIZE 1024
 
-volatile char uart_rx_buffer[UART_BUFFER_SIZE];
-volatile int uart_rx_buffer_index = 0;
+static cbuf _rx_buffer(1024);
 
 //called by the interrupt check thread
 void uart_check_fifos(){
-  if((UART0CR & _BV(UART0EN)) != 0){
-    while((UART0FR & _BV(UART0RXFE)) == 0 && uart_rx_buffer_index < UART_BUFFER_SIZE)
-      uart_rx_buffer[uart_rx_buffer_index++] = UART0DR;
-  }
+  while((UART0FR & (1 << UART0RXFE)) == 0)
+    _rx_buffer.write(UART0DR);
 }
 
 size_t HardwareSerial::write(uint8_t c){
@@ -62,23 +61,19 @@ void HardwareSerial::end(){
 }
 
 int HardwareSerial::available(void){
-  return uart_rx_buffer_index;
+  return _rx_buffer.getSize();
 }
 
 int HardwareSerial::peek(void){
-  return uart_rx_buffer[0];
+  return _rx_buffer.peek();
 }
 
 int HardwareSerial::read(void){
-  uint8_t data = uart_rx_buffer[0];
-  uart_rx_buffer_index--;
-  int i;
-  for(i = 0; i < uart_rx_buffer_index; i++) uart_rx_buffer[i] = uart_rx_buffer[i+1];
-  return data;
+  return _rx_buffer.read();
 }
 
 void HardwareSerial::flush(){
-  uart_rx_buffer_index = 0;
+  _rx_buffer.flush();
 }
 
 #ifdef SERIAL_TO_CONSOLE
