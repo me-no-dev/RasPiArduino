@@ -41,7 +41,6 @@ void PiServer::_check_loop(){
       delay(1);
       continue;
     }
-    Serial.println("client");
     PiClient client(client_sock);
     client.setNoDelay(true);
     if(_cb)
