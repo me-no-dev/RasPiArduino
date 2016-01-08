@@ -24,6 +24,33 @@
 #include <sys/ioctl.h>
 #include "PiServer.h"
 
+void *_server_check_thread(void *arg){
+  PiServer *s = (PiServer*)arg;
+  s->_check_loop();
+  pthread_exit(NULL);
+}
+
+void PiServer::_check_loop(){
+  for(;;){
+    if(!_listening)
+      return;
+    struct sockaddr_in _client;
+    int c = sizeof(struct sockaddr_in);
+    int client_sock = accept4(sockfd, (struct sockaddr *)&_client, (socklen_t*)&c, SOCK_NONBLOCK);
+    if (client_sock < 0){
+      delay(1);
+      continue;
+    }
+    Serial.println("client");
+    PiClient client(client_sock);
+    client.setNoDelay(true);
+    if(_cb)
+      _cb(client);
+    else
+      client.stop();
+  }
+}
+
 void PiServer::begin(){
   if(_listening)
     return;
@@ -38,25 +65,15 @@ void PiServer::begin(){
     return;
   if(listen(sockfd , _max_clients) < 0)
     return;
+  start_thread(_server_check_thread, this);
   _listening = true;
 }
+
 void PiServer::end(){
   close(sockfd);
   _listening = false;
 }
+
 void PiServer::onClient(PiServerHandler cb){
   _cb = cb;
-}
-void PiServer::handle(){
-  struct sockaddr_in _client;
-  int c = sizeof(struct sockaddr_in);
-  int client_sock = accept4(sockfd, (struct sockaddr *)&_client, (socklen_t*)&c, SOCK_NONBLOCK);
-  if (client_sock < 0)
-    return;
-  PiClient client(client_sock);
-  client.setNoDelay(true);
-  if(_cb)
-    _cb(client);
-  else
-    client.stop();
 }

@@ -26,9 +26,10 @@
 class PiClient : public Client {
 
 public:
-  PiClient():sockfd(0),_connected(false){}
+  PiClient():sockfd(-1),_connected(false){}
   PiClient(int fd):sockfd(fd),_connected(true){}
   ~PiClient();
+  int fd(){return sockfd;}
   int connect(IPAddress ip, uint16_t port);
   int connect(const char *host, uint16_t port);
   int setSocketOption(int option, char* value, size_t len);

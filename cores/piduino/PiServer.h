@@ -24,7 +24,7 @@
 #include "Server.h"
 #include "PiClient.h"
 
-typedef void(*PiServerHandler)(PiClient);
+typedef void(*PiServerHandler)(Client&);
 
 class PiServer : public Server {
   private:
@@ -33,6 +33,7 @@ class PiServer : public Server {
     uint8_t _max_clients;
     bool _listening;
     PiServerHandler _cb;
+
   public:
     PiServer(uint16_t port, uint8_t max_clients=8):sockfd(-1),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL){}
     ~PiServer(){ end();}
@@ -40,7 +41,8 @@ class PiServer : public Server {
     void begin();
     void end();
     void onClient(PiServerHandler cb);
-    void handle();
+    //private do not call!
+    void _check_loop();
 };
 
 #endif

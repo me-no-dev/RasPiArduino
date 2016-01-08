@@ -22,14 +22,14 @@
 
 static pthread_mutex_t thread_mutexes[4];
 
-int start_thread(void *(*fn)(void *), void * arg){
+int start_thread(thread_fn fn, void * arg){
     pthread_t myThread ;
     int fd = pthread_create(&myThread, NULL, fn, arg) ;
     pthread_detach(myThread);
     return fd;
 }
 
-int create_thread(void *(*fn)(void *)){
+int create_thread(thread_fn fn){
   return start_thread(fn, NULL);
 }
 

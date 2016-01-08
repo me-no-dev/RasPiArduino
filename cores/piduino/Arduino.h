@@ -118,8 +118,10 @@ void delayMicroseconds(uint32_t m);
 int init(void);
 void uninit(void);
 
-int create_thread(void *(*fn)(void *));
-int start_thread(void *(*fn)(void *), void * arg);
+typedef void *(*thread_fn)(void *);
+
+int create_thread(thread_fn);
+int start_thread(thread_fn, void * arg);
 void lock_thread(int index);
 void unlock_thread(int index);
 int elevate_prio(const int prio);
