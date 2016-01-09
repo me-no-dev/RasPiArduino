@@ -1,187 +1,92 @@
-/*
-  Server.h - Server class for Raspberry Pi
-  Copyright (c) 2016 Hristo Gochkov  All right reserved.
+#include "utility/w5100.h"
+#include "utility/socket.h"
+extern "C" {
+#include "string.h"
+}
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <linux/tcp.h>
-#include <sys/ioctl.h>
-#include <sys/epoll.h>
+#include "Ethernet.h"
+#include "EthernetClient.h"
 #include "EthernetServer.h"
 
-#define MAXEVENTS 64
+EthernetServer::EthernetServer(uint16_t port)
+{
+  _port = port;
+}
 
-void EthernetServer::cleanup(){
-  if(clients == NULL) return;
-  EthernetClient *c1 = clients;
-  while(c1 != NULL && !c1->connected()){
-    EthernetClient *c = c1;
-    c1 = c1->next;
-    delete c;
-  }
-  clients = c1;
-  if(clients == NULL) return;
-  EthernetClient *c2 = clients->next;
-  while(c2 != NULL){
-    if(!c2->connected()){
-      EthernetClient *c = c2;
-      c2 = c2->next;
-      c1->next = c2;
-      delete c;
-    } else {
-      c1 = c2;
-      c2 = c2->next;
+void EthernetServer::begin()
+{
+  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
+    EthernetClient client(sock);
+    if (client.status() == SnSR::CLOSED) {
+      socket(sock, SnMR::TCP, _port, 0);
+      listen(sock);
+      EthernetClass::_server_port[sock] = _port;
+      break;
     }
-  }
+  }  
 }
 
-int EthernetServer::setSocketOption(int option, char* value, size_t len){
-  return setsockopt(sockfd, SOL_SOCKET, option, value, len);
-}
+void EthernetServer::accept()
+{
+  int listening = 0;
 
-int EthernetServer::setTimeout(uint32_t seconds){
-  struct timeval tv;
-  tv.tv_sec = seconds;
-  tv.tv_usec = 0;
-  if(setSocketOption(SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval)) < 0)
-    return -1;
-  return setSocketOption(SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
-}
+  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
+    EthernetClient client(sock);
 
-size_t EthernetServer::write(const uint8_t *data, size_t len){
-  cleanup();
-  EthernetClient *c = clients;
-  while(c != NULL){
-    c->write(data, len);
-    c = c->next;
-  }
-  return len;
-}
-
-void EthernetServer::stopAll(){
-  while(clients != NULL){
-    EthernetClient *d = clients;
-    clients = clients->next;
-    d->stop();
-    delete d;
-  }
-}
-
-EthernetClient EthernetServer::available(){
-  if(!_listening)
-    return EthernetClient();
-
-  int n, i;
-  n = epoll_wait(pollfd, events, MAXEVENTS, 10);
-  for (i = 0; i < n; i++){
-    if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))){
-      /* An error has occured on this fd, or the socket is not ready for reading (why were we notified then?) */
-      //Serial.printf("epoll error on fd: %d\n", events[i].data.fd);
-      EthernetClient *c = clientByFd(events[i].data.fd);
-      if(c != NULL && !c->available()){
-        c->stop();
+    if (EthernetClass::_server_port[sock] == _port) {
+      if (client.status() == SnSR::LISTEN) {
+        listening = 1;
+      } 
+      else if (client.status() == SnSR::CLOSE_WAIT && !client.available()) {
+        client.stop();
       }
-    }
-    else if (sockfd == events[i].data.fd){
-      /* We have a notification on the listening socket, which means one or more incoming connections. */
-      //Serial.printf("incomming connection on fd: %d\n", events[i].data.fd);
-      struct sockaddr_in _client;
-      int cs = sizeof(struct sockaddr_in);
-      int client_sock = accept4(sockfd, (struct sockaddr *)&_client, (socklen_t*)&cs, SOCK_NONBLOCK);
-      if(client_sock){
-        struct epoll_event event;
-        event.data.fd = client_sock;
-        event.events = EPOLLIN | EPOLLET;
-        epoll_ctl(pollfd, EPOLL_CTL_ADD, client_sock, &event);
-        
-        EthernetClient *client = new EthernetClient(client_sock);
-        int val = 1;
-        client->setSocketOption(SO_KEEPALIVE, (char*)&val, sizeof(int));
-        if(clients == NULL){
-          clients = client;
-        } else {
-          EthernetClient *c = clients;
-          while(c->next != NULL) c = c->next;
-          c->next = client;
+    } 
+  }
+
+  if (!listening) {
+    begin();
+  }
+}
+
+EthernetClient EthernetServer::available()
+{
+  accept();
+
+  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
+    EthernetClient client(sock);
+    if (EthernetClass::_server_port[sock] == _port) {
+      uint8_t s = client.status();
+      if (s == SnSR::ESTABLISHED || s == SnSR::CLOSE_WAIT) {
+        if (client.available()) {
+          // XXX: don't always pick the lowest numbered socket.
+          return client;
         }
       }
     }
-    else {
-      //Serial.printf("incomming data on fd: %d\n", events[i].data.fd);
-      //if read() returns 0 then we are disconnected
-      /* We have data on the fd waiting to be read. Read and
-         display it. We must read whatever data is available
-         completely, as we are running in edge-triggered mode
-         and won't get a notification again for the same
-         data. */
-      EthernetClient *c = clientByFd(events[i].data.fd);
-      if(c != NULL && !c->available()){
-        c->stop();
-      }
-    }
   }
-  cleanup();
 
-  EthernetClient *c = clients;
-  while(c != NULL){
-    if(c->available()){
-      return *c;
-    }
-    c = c->next;
-  }
-  return EthernetClient();
+  return EthernetClient(MAX_SOCK_NUM);
 }
 
-void EthernetServer::begin(){
-  if(_listening)
-    return;
-  struct sockaddr_in server;
-  sockfd = socket(AF_INET , SOCK_STREAM | SOCK_NONBLOCK, 0);
-  if (sockfd < 0)
-    return;
-  server.sin_family = AF_INET;
-  server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(_port);
-  if(bind(sockfd, (struct sockaddr *)&server, sizeof(server)) < 0)
-    return;
-  if(listen(sockfd , _max_clients) < 0)
-    return;
-
-  pollfd = epoll_create1(0);
-  if (pollfd == -1)
-    return;
-
-  struct epoll_event event;
-  event.data.fd = sockfd;
-  event.events = EPOLLIN | EPOLLET;
-  if (epoll_ctl(pollfd, EPOLL_CTL_ADD, sockfd, &event) == -1)
-    return;
-
-  events = (epoll_event*)calloc(MAXEVENTS, sizeof event);
-  if(events == NULL)
-    return;
-  _listening = true;
+size_t EthernetServer::write(uint8_t b) 
+{
+  return write(&b, 1);
 }
 
-void EthernetServer::end(){
-  stopAll();
-  close(sockfd);
-  sockfd = -1;
-  _listening = false;
+size_t EthernetServer::write(const uint8_t *buffer, size_t size) 
+{
+  size_t n = 0;
+  
+  accept();
+
+  for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
+    EthernetClient client(sock);
+
+    if (EthernetClass::_server_port[sock] == _port &&
+      client.status() == SnSR::ESTABLISHED) {
+      n += client.write(buffer, size);
+    }
+  }
+  
+  return n;
 }

@@ -63,19 +63,24 @@ void loop() {
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
-          String response = "<html><pre>GPIO:";
-          for (int pin = 0; pin < 32; pin++) {
-            response += String(digitalRead(pin)+0x30);
-          }
-          response += "</pre></html>";
           // send a standard http response header
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
-          client.print("Content-Length: "); client.println(response.length());//if not sent the browser will keep the connection open
           client.println("Connection: close");  // the connection will be closed after completion of the response
           client.println("Refresh: 5");  // refresh the page automatically every 5 sec
           client.println();
-          client.print(response);
+          client.println("<!DOCTYPE HTML>");
+          client.println("<html>");
+          // output the value of each analog input pin
+          for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
+            int sensorReading = analogRead(analogChannel);
+            client.print("analog input ");
+            client.print(analogChannel);
+            client.print(" is ");
+            client.print(sensorReading);
+            client.println("<br />");
+          }
+          client.println("</html>");
           break;
         }
         if (c == '\n') {

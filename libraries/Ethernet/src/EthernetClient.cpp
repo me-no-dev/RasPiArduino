@@ -1,170 +1,177 @@
-/*
-  Client.h - Client class for Raspberry Pi
-  Copyright (c) 2016 Hristo Gochkov  All right reserved.
+#include "utility/w5100.h"
+#include "utility/socket.h"
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+extern "C" {
+  #include "string.h"
+}
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+#include "Arduino.h"
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
-
-
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <linux/tcp.h>
-#include <sys/ioctl.h>
+#include "Ethernet.h"
 #include "EthernetClient.h"
+#include "EthernetServer.h"
+#include "Dns.h"
 
-int sock_connect(int fd, struct sockaddr *addr, size_t len){
-  return connect(fd, addr, len);
+uint16_t EthernetClient::_srcport = 49152;      //Use IANA recommended ephemeral port range 49152-65535
+
+EthernetClient::EthernetClient() : _sock(MAX_SOCK_NUM) {
 }
 
-int sock_write(int fd, void *data, size_t len){
-  return write(fd, data, len);
+EthernetClient::EthernetClient(uint8_t sock) : _sock(sock) {
 }
 
-int sock_read(int fd, void *data, size_t len){
-  return read(fd, data, len);
+int EthernetClient::connect(const char* host, uint16_t port) {
+  // Look up the host first
+  int ret = 0;
+  DNSClient dns;
+  IPAddress remote_addr;
+
+  dns.begin(Ethernet.dnsServerIP());
+  ret = dns.getHostByName(host, remote_addr);
+  if (ret == 1) {
+    return connect(remote_addr, port);
+  } else {
+    return ret;
+  }
 }
 
-EthernetClient::~EthernetClient(){
-  //if(sockfd) close(sockfd);
-}
+int EthernetClient::connect(IPAddress ip, uint16_t port) {
+  if (_sock != MAX_SOCK_NUM)
+    return 0;
 
-int EthernetClient::connect(IPAddress ip, uint16_t port){
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (sockfd < 0){
+  for (int i = 0; i < MAX_SOCK_NUM; i++) {
+    uint8_t s = socketStatus(i);
+    if (s == SnSR::CLOSED || s == SnSR::FIN_WAIT || s == SnSR::CLOSE_WAIT) {
+      _sock = i;
+      break;
+    }
+  }
+
+  if (_sock == MAX_SOCK_NUM)
+    return 0;
+
+  _srcport++;
+  if (_srcport == 0) _srcport = 49152;          //Use IANA recommended ephemeral port range 49152-65535
+  socket(_sock, SnMR::TCP, _srcport, 0);
+
+  if (!::connect(_sock, rawIPAddress(ip), port)) {
+    _sock = MAX_SOCK_NUM;
     return 0;
   }
-  uint32_t ip_addr = ip;
-  struct sockaddr_in serveraddr;
-  bzero((char *) &serveraddr, sizeof(serveraddr));
-  serveraddr.sin_family = AF_INET;
-  bcopy((const void *)(&ip_addr), (void *)&serveraddr.sin_addr.s_addr, 4);
-  serveraddr.sin_port = htons(port);
-  if (sock_connect(sockfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr)) < 0){
-    return 0;
+
+  while (status() != SnSR::ESTABLISHED) {
+    delay(1);
+    if (status() == SnSR::CLOSED) {
+      _sock = MAX_SOCK_NUM;
+      return 0;
+    }
   }
-  _connected = true;
+
   return 1;
 }
-int EthernetClient::connect(const char *host, uint16_t port){
-  struct hostent *server;
-  server = gethostbyname(host);
-  if (server == NULL)
+
+size_t EthernetClient::write(uint8_t b) {
+  return write(&b, 1);
+}
+
+size_t EthernetClient::write(const uint8_t *buf, size_t size) {
+  if (_sock == MAX_SOCK_NUM) {
+    setWriteError();
     return 0;
-  return connect(IPAddress((const uint8_t *)(server->h_addr)), port);
+  }
+  if (!send(_sock, buf, size)) {
+    setWriteError();
+    return 0;
+  }
+  return size;
 }
-int EthernetClient::setSocketOption(int option, char* value, size_t len){
-  return setsockopt(sockfd, SOL_SOCKET, option, value, len);
+
+int EthernetClient::available() {
+  if (_sock != MAX_SOCK_NUM)
+    return recvAvailable(_sock);
+  return 0;
 }
-int EthernetClient::setTimeout(uint32_t seconds){
-  struct timeval tv;
-  tv.tv_sec = seconds;
-  tv.tv_usec = 0;
-  if(setSocketOption(SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval)) < 0)
+
+int EthernetClient::read() {
+  uint8_t b;
+  if ( recv(_sock, &b, 1) > 0 )
+  {
+    // recv worked
+    return b;
+  }
+  else
+  {
+    // No data available
     return -1;
-  return setSocketOption(SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
-}
-int EthernetClient::setOption(int option, int *value){
-  return setsockopt(sockfd, IPPROTO_TCP, option, (char *)value, sizeof(int));
-}
-int EthernetClient::getOption(int option, int *value){
-  size_t size = sizeof(int);
-  return getsockopt(sockfd, IPPROTO_TCP, option, (char *)value, &size);
-}
-int EthernetClient::setNoDelay(bool nodelay){
-  int flag = nodelay;
-  return setOption(TCP_NODELAY, &flag);
-}
-bool EthernetClient::getNoDelay(){
-  int flag = 0;
-  getOption(TCP_NODELAY, &flag);
-  return flag;
-}
-size_t EthernetClient::write(uint8_t data){
-  return write(&data, 1);
-}
-size_t EthernetClient::write(const uint8_t *buf, size_t size){
-  if(!_connected) return 0;
-  int res = send(sockfd, (void*)buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
-  if(res < 0){
-    _connected = false;
-    res = 0;
   }
-  return res;
-}
-int EthernetClient::read(){
-  uint8_t data = 0;
-  int res = read(&data, 1);
-  if(res < 0){
-    return res;
-  }
-  return data;
-}
-int EthernetClient::read(uint8_t *buf, size_t size){
-  if(!_connected) return -1;
-  int res = sock_read(sockfd, 0, 0);
-  if(size && res == 0 && available()){
-     res = recv(sockfd, buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
-  }
-  if(res < 0){
-    _connected = false;
-  }
-  return res;
-}
-int EthernetClient::available(){
-  int count;
-  ioctl(sockfd, FIONREAD, &count);
-  return count;
-}
-void EthernetClient::stop(){
-  if(sockfd > 0)
-    close(sockfd);
-  _connected = false;
-}
-uint8_t EthernetClient::connected(){
-  if(!_connected)
-    return 0;
-  read(0,0);
-  return _connected;
 }
 
-IPAddress EthernetClient::remoteIP(int fd){
-  struct sockaddr_storage addr;
-  socklen_t len = sizeof addr;
-  getpeername(fd, (struct sockaddr*)&addr, &len);
-  struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-  return IPAddress((uint32_t)(s->sin_addr.s_addr));
+int EthernetClient::read(uint8_t *buf, size_t size) {
+  return recv(_sock, buf, size);
 }
 
-uint16_t EthernetClient::remotePort(int fd){
-  struct sockaddr_storage addr;
-  socklen_t len = sizeof addr;
-  getpeername(fd, (struct sockaddr*)&addr, &len);
-  struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-  return ntohs(s->sin_port);
+int EthernetClient::peek() {
+  uint8_t b;
+  // Unlike recv, peek doesn't check to see if there's any data available, so we must
+  if (!available())
+    return -1;
+  ::peek(_sock, &b);
+  return b;
 }
 
-IPAddress EthernetClient::remoteIP(){
-  return remoteIP(sockfd);
+void EthernetClient::flush() {
+  ::flush(_sock);
 }
 
-uint16_t EthernetClient::remotePort(){
-  return remotePort(sockfd);
+void EthernetClient::stop() {
+  if (_sock == MAX_SOCK_NUM)
+    return;
+
+  // attempt to close the connection gracefully (send a FIN to other side)
+  disconnect(_sock);
+  unsigned long start = millis();
+
+  // wait up to a second for the connection to close
+  uint8_t s;
+  do {
+    s = status();
+    if (s == SnSR::CLOSED)
+      break; // exit the loop
+    delay(1);
+  } while (millis() - start < 1000);
+
+  // if it hasn't closed, close it forcefully
+  if (s != SnSR::CLOSED)
+    close(_sock);
+
+  EthernetClass::_server_port[_sock] = 0;
+  _sock = MAX_SOCK_NUM;
+}
+
+uint8_t EthernetClient::connected() {
+  if (_sock == MAX_SOCK_NUM) return 0;
+
+  uint8_t s = status();
+  return !(s == SnSR::LISTEN || s == SnSR::CLOSED || s == SnSR::FIN_WAIT ||
+    (s == SnSR::CLOSE_WAIT && !available()));
+}
+
+uint8_t EthernetClient::status() {
+  if (_sock == MAX_SOCK_NUM) return SnSR::CLOSED;
+  return socketStatus(_sock);
+}
+
+// the next function allows us to use the client returned by
+// EthernetServer::available() as the condition in an if-statement.
+
+EthernetClient::operator bool() {
+  return _sock != MAX_SOCK_NUM;
 }
 
 bool EthernetClient::operator==(const EthernetClient& rhs) {
-  return sockfd == rhs.sockfd && remotePort(sockfd) == remotePort(rhs.sockfd) && remoteIP(sockfd) == remoteIP(rhs.sockfd);
+  return _sock == rhs._sock && _sock != MAX_SOCK_NUM && rhs._sock != MAX_SOCK_NUM;
+}
+
+uint8_t EthernetClient::getSocketNumber() {
+  return _sock;
 }

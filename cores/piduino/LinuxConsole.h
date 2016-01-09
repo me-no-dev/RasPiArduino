@@ -21,11 +21,17 @@
 #define LINUX_CONSOLE_H
 
 #include "Stream.h"
+class BridgeClass;
 
 class LinuxConsole : public Stream{
   protected:
     
   public:
+    LinuxConsole(BridgeClass &_b){}
+    void buffer(uint8_t size){}
+    void noBuffer(){}
+    bool connected(){return true;}
+    
     inline LinuxConsole(){}
     void begin();
     inline void begin(uint32_t baud){}

@@ -16,13 +16,14 @@
 
 #define digitalPinToPort(p)         (((p)<32)?0:1)
 #define digitalPinToBitMask(p)      (1 << p)
-#define portOutputRegister(p)       ((p)?&GPSET1:&GPSET0)
+#define portOutputRegister(p)       ((volatile uint32_t *)((p)?&GPSET1:&GPSET0))
+#define portModeRegister(p)         ((volatile uint32_t *)((p)?&GPSET1:&GPSET0))
 
 #define digitalPinHasPWM(p)         ((p) == 12 || (p) == 13 || (p) == 18 || (p) == 19)
 #define digitalPinToInterrupt(p)    (p)
 #define digitalPinToTimer(p)        ((p==12||p==18)?0:(p==13||p==19)?1:-1)
 
-
+//*portModeRegister(digitalPinToPort(ETHERNET_SHIELD_SPI_CS)) |= digitalPinToBitMask(ETHERNET_SHIELD_SPI_CS);
 
 static const uint8_t ID_SD = 0; //pin 27
 static const uint8_t ID_SC = 1; //pin 28

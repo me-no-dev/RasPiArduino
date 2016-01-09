@@ -2,6 +2,7 @@
 // (c) Copyright 2009-2010 MCQN Ltd.
 // Released under Apache License, version 2.0
 
+#include "utility/w5100.h"
 #include "EthernetUdp.h"
 #include "utility/util.h"
 
@@ -108,7 +109,7 @@ int DNSClient::getHostByName(const char* aHostname, IPAddress& aResult)
     }
 
     // Check we've got a valid DNS server to use
-    if (iDNSServer == IPAddress(0,0,0,0))
+    if (iDNSServer == INADDR_NONE)
     {
         return INVALID_SERVER;
     }

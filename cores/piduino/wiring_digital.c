@@ -19,11 +19,13 @@
 
 #include "Arduino.h"
 #include "bcm2835_registers.h"
+#define GPFSELIN(pin) do { GPFSEL(pin) &= ~(0x07 << GPFSELB(pin)); GPPUD = 0; } while(0)
+#define GPFSELOUT(pin) do { GPFSEL(pin) = (GPFSEL(pin) & ~(0x07 << GPFSELB(pin))) | ((1 & 0x07) << GPFSELB(pin)); } while(0)
 
 void pinMode(uint8_t pin, uint8_t mode){
   GPFSEL(pin) &= ~(0x07 << GPFSELB(pin));//clear gpio function
   GPFSEL(pin) |= ((mode & 0x07) << GPFSELB(pin));//set function to pin
-  if((mode & 0x07) == 0){
+  if((mode & 0x07) == 0){//PULLUP/PULLDOWN
     mode &= 0x30;
     mode >>= 4;
     GPPUD = mode;
