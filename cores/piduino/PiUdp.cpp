@@ -14,7 +14,7 @@ uint8_t PiUDP::begin(uint16_t port){
   addr.sin_family = AF_INET;
   addr.sin_port = htons(port);
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  if(bind(udp_server , (struct sockaddr*)&addr, sizeof(addr) ) == -1){
+  if(bind(udp_server , (struct sockaddr*)&addr, sizeof(addr)) == -1){
     udp_server = -1;
     return 0;
   }
@@ -80,9 +80,9 @@ int PiUDP::parsePacket(){
     return 0;
   struct sockaddr_in si_other;
   int slen = sizeof(si_other) , len;
-  char buf[1500];
-  bzero(buf, 1500);
-  if ((len = recvfrom(udp_server, buf, 1500, MSG_DONTWAIT, (struct sockaddr *) &si_other, (socklen_t *)&slen)) == -1){
+  char buf[2048];
+  bzero(buf, 2048);
+  if ((len = recvfrom(udp_server, buf, 2048, MSG_DONTWAIT, (struct sockaddr *) &si_other, (socklen_t *)&slen)) == -1){
     return 0;
   }
   remote_ip = IPAddress(si_other.sin_addr.s_addr);
@@ -93,14 +93,17 @@ int PiUDP::parsePacket(){
 }
 
 int PiUDP::available(){
+  if(!rx_buffer) return 0;
   return rx_buffer->getSize();
 }
 
 int PiUDP::read(){
+  if(!rx_buffer) return -1;
   int out = rx_buffer->read();
   if(!rx_buffer->getSize()){
-    delete rx_buffer;
+    cbuf *b = rx_buffer;
     rx_buffer = 0;
+    delete b;
   }
   return out;
 }
@@ -110,22 +113,25 @@ int PiUDP::read(unsigned char* buffer, size_t len){
 }
 
 int PiUDP::read(char* buffer, size_t len){
+  if(!rx_buffer) return 0;
   int out = rx_buffer->read(buffer, len);
   if(!rx_buffer->getSize()){
-    delete rx_buffer;
+    cbuf *b = rx_buffer;
     rx_buffer = 0;
+    delete b;
   }
   return out;
 }
 
 int PiUDP::peek(){
+  if(!rx_buffer) return -1;
   return rx_buffer->peek();
 }
 
 void PiUDP::flush(){
-  rx_buffer->flush();
-  delete rx_buffer;
+  cbuf *b = rx_buffer;
   rx_buffer = 0;
+  delete b;
 }
 
 IPAddress PiUDP::remoteIP(){

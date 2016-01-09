@@ -29,20 +29,31 @@ typedef void(*PiServerHandler)(Client&);
 class PiServer : public Server {
   private:
     int sockfd;
+    int pollfd;
+    struct epoll_event *events;
     uint16_t _port;
     uint8_t _max_clients;
     bool _listening;
     PiServerHandler _cb;
+    PiClient *clients;
+
+    //cleans all disconnected clients
+    void cleanup();
+    int setSocketOption(int option, char* value, size_t len);
 
   public:
-    PiServer(uint16_t port, uint8_t max_clients=8):sockfd(-1),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL){}
+    PiServer(uint16_t port, uint8_t max_clients=8):sockfd(-1),pollfd(0),events(NULL),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL),clients(NULL){}
     ~PiServer(){ end();}
     operator bool(){return _listening;}
     void begin();
     void end();
-    void onClient(PiServerHandler cb);
-    //private do not call!
-    void _check_loop();
+    PiClient available();
+    //Write data to all the clients connected to a server.
+    size_t write(uint8_t *data, size_t len);
+    size_t write(uint8_t data){
+      return write(&data, 1);
+    }
+    int setTimeout(uint32_t seconds);
 };
 
 #endif

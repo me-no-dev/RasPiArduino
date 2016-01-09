@@ -22,32 +22,122 @@
 #include <netdb.h>
 #include <linux/tcp.h>
 #include <sys/ioctl.h>
+#include <sys/epoll.h>
 #include "PiServer.h"
 
-void *_server_check_thread(void *arg){
-  PiServer *s = (PiServer*)arg;
-  s->_check_loop();
-  pthread_exit(NULL);
+#define MAXEVENTS 64
+
+void PiServer::cleanup(){
+  if(clients == NULL) return;
+  PiClient *c1 = clients;
+  while(c1 != NULL && !c1->connected()){
+    PiClient *c = c1;
+    c1 = c1->next;
+    delete c;
+  }
+  clients = c1;
+  if(clients == NULL) return;
+  PiClient *c2 = clients->next;
+  while(c2 != NULL){
+    if(!c2->connected()){
+      PiClient *c = c2;
+      c2 = c2->next;
+      c1->next = c2;
+      delete c;
+    } else {
+      c1 = c2;
+      c2 = c2->next;
+    }
+  }
 }
 
-void PiServer::_check_loop(){
-  for(;;){
-    if(!_listening)
-      return;
-    struct sockaddr_in _client;
-    int c = sizeof(struct sockaddr_in);
-    int client_sock = accept4(sockfd, (struct sockaddr *)&_client, (socklen_t*)&c, SOCK_NONBLOCK);
-    if (client_sock < 0){
-      delay(1);
-      continue;
-    }
-    PiClient client(client_sock);
-    client.setNoDelay(true);
-    if(_cb)
-      _cb(client);
-    else
-      client.stop();
+int PiServer::setSocketOption(int option, char* value, size_t len){
+  return setsockopt(sockfd, SOL_SOCKET, option, value, len);
+}
+
+int PiServer::setTimeout(uint32_t seconds){
+  struct timeval tv;
+  tv.tv_sec = seconds;
+  tv.tv_usec = 0;
+  if(setSocketOption(SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval)) < 0)
+    return -1;
+  return setSocketOption(SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
+}
+
+size_t PiServer::write(uint8_t *data, size_t len){
+  cleanup();
+  PiClient *c = clients;
+  while(c != NULL){
+    c->write(data, len);
+    c = c->next;
   }
+  return len;
+}
+
+PiClient PiServer::available(){
+  cleanup();
+  if(!_listening)
+    return PiClient();
+
+  int n, i;
+  n = epoll_wait(pollfd, events, MAXEVENTS, 100);
+  for (i = 0; i < n; i++){
+    if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))){
+      /* An error has occured on this fd, or the socket is not ready for reading (why were we notified then?) */
+      //Serial.printf("epoll error on fd: %d\n", events[i].data.fd);
+      PiClient *c = clients;
+      while(c != NULL && c->fd() != events[i].data.fd) c = c->next;
+      if(c != NULL && !c->available()){
+        c->stop();
+      }
+    }
+    else if (sockfd == events[i].data.fd){
+      /* We have a notification on the listening socket, which means one or more incoming connections. */
+      //Serial.printf("incomming connection on fd: %d\n", events[i].data.fd);
+      struct sockaddr_in _client;
+      int cs = sizeof(struct sockaddr_in);
+      int client_sock = accept4(sockfd, (struct sockaddr *)&_client, (socklen_t*)&cs, SOCK_NONBLOCK);
+      if(client_sock){
+        struct epoll_event event;
+        event.data.fd = client_sock;
+        event.events = EPOLLIN | EPOLLET;
+        epoll_ctl(pollfd, EPOLL_CTL_ADD, client_sock, &event);
+        PiClient *client = new PiClient(client_sock);
+        int val = 1;
+        client->setSocketOption(SO_KEEPALIVE, (char*)&val, sizeof(int));
+        if(clients == NULL){
+          clients = client;
+        } else {
+          PiClient *c = clients;
+          while(c->next != NULL) c = c->next;
+          c->next = client;
+        }
+      }
+    }
+    else {
+      //Serial.printf("incomming data on fd: %d\n", events[i].data.fd);
+      //if read() returns 0 then we are disconnected
+      /* We have data on the fd waiting to be read. Read and
+         display it. We must read whatever data is available
+         completely, as we are running in edge-triggered mode
+         and won't get a notification again for the same
+         data. */
+      PiClient *c = clients;
+      while(c != NULL && c->fd() != events[i].data.fd) c = c->next;
+      if(c != NULL && !c->available()){
+        c->stop();
+      }
+    }
+  }
+
+  PiClient *c = clients;
+  while(c != NULL){
+    if(c->available()){
+      return *c;
+    }
+    c = c->next;
+  }
+  return PiClient();
 }
 
 void PiServer::begin(){
@@ -64,16 +154,31 @@ void PiServer::begin(){
     return;
   if(listen(sockfd , _max_clients) < 0)
     return;
-  start_thread(_server_check_thread, this);
+
+  pollfd = epoll_create1(0);
+  if (pollfd == -1)
+    return;
+
+  struct epoll_event event;
+  event.data.fd = sockfd;
+  event.events = EPOLLIN | EPOLLET;
+  if (epoll_ctl(pollfd, EPOLL_CTL_ADD, sockfd, &event) == -1)
+    return;
+
+  events = (epoll_event*)calloc(MAXEVENTS, sizeof event);
+  if(events == NULL)
+    return;
   _listening = true;
 }
 
 void PiServer::end(){
+  while(clients != NULL){
+    PiClient *d = clients;
+    clients = clients->next;
+    d->stop();
+    delete d;
+  }
   close(sockfd);
   sockfd = -1;
   _listening = false;
-}
-
-void PiServer::onClient(PiServerHandler cb){
-  _cb = cb;
 }

@@ -68,13 +68,6 @@ int PiClient::connect(const char *host, uint16_t port){
 int PiClient::setSocketOption(int option, char* value, size_t len){
   return setsockopt(sockfd, SOL_SOCKET, option, value, len);
 }
-int PiClient::setOption(int option, int *value){
-  return setsockopt(sockfd, IPPROTO_TCP, option, (char *)value, sizeof(int));
-}
-int PiClient::getOption(int option, int *value){
-  size_t size = sizeof(int);
-  return getsockopt(sockfd, IPPROTO_TCP, option, (char *)value, &size);
-}
 int PiClient::setTimeout(uint32_t seconds){
   struct timeval tv;
   tv.tv_sec = seconds;
@@ -82,6 +75,13 @@ int PiClient::setTimeout(uint32_t seconds){
   if(setSocketOption(SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval)) < 0)
     return -1;
   return setSocketOption(SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
+}
+int PiClient::setOption(int option, int *value){
+  return setsockopt(sockfd, IPPROTO_TCP, option, (char *)value, sizeof(int));
+}
+int PiClient::getOption(int option, int *value){
+  size_t size = sizeof(int);
+  return getsockopt(sockfd, IPPROTO_TCP, option, (char *)value, &size);
 }
 int PiClient::setNoDelay(bool nodelay){
   int flag = nodelay;
@@ -97,7 +97,7 @@ size_t PiClient::write(uint8_t data){
 }
 size_t PiClient::write(const uint8_t *buf, size_t size){
   if(!_connected) return 0;
-  int res = send(sockfd, (void*)buf, size, MSG_DONTWAIT);
+  int res = send(sockfd, (void*)buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
   if(res < 0){
     _connected = false;
     res = 0;
@@ -116,7 +116,7 @@ int PiClient::read(uint8_t *buf, size_t size){
   if(!_connected) return -1;
   int res = sock_read(sockfd, 0, 0);
   if(size && res == 0 && available()){
-     res = recv(sockfd, buf, size, MSG_DONTWAIT);
+     res = recv(sockfd, buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
   }
   if(res < 0){
     _connected = false;
@@ -130,8 +130,11 @@ int PiClient::available(){
 }
 void PiClient::stop(){
   close(sockfd);
+  _connected = false;
 }
 uint8_t PiClient::connected(){
+  if(!_connected)
+    return 0;
   read(0,0);
   return _connected;
 }
