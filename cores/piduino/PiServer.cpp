@@ -80,7 +80,7 @@ PiClient PiServer::available(){
     return PiClient();
 
   int n, i;
-  n = epoll_wait(pollfd, events, MAXEVENTS, 100);
+  n = epoll_wait(pollfd, events, MAXEVENTS, 1);
   for (i = 0; i < n; i++){
     if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))){
       /* An error has occured on this fd, or the socket is not ready for reading (why were we notified then?) */
