@@ -54,6 +54,12 @@ class PiServer : public Server {
       return write(&data, 1);
     }
     int setTimeout(uint32_t seconds);
+    PiClient *clientByFd(int fd){
+      PiClient *c = clients;
+      while(c != NULL && c->fd() != fd) c = c->next;
+      return c;
+    }
+    void stopAll();
 };
 
 #endif

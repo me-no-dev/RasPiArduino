@@ -15,7 +15,7 @@ compiler.ar.cmd={runtime.tools.toolchain.prefix}ar
 compiler.objcopy.cmd={runtime.tools.toolchain.prefix}objcopy
 compiler.size.cmd={runtime.tools.toolchain.prefix}size
 
-compiler.cpreprocessor.flags= -I"{runtime.platform.path}/tools/compat/include"
+compiler.cpreprocessor.flags="-I{runtime.platform.path}/tools/compat/include" -D_GNU_SOURCE
 compiler.c.flags=-c -O3 -MD -Wall -Winline -pipe
 compiler.cpp.flags=-c -O3 -MD -Wall -Winline -pipe
 compiler.S.flags=-c -g -x assembler-with-cpp -MMD -mlongcalls

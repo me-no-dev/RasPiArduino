@@ -52,8 +52,7 @@ void console_run(void){
 void console_signal_handler(int signo){
   if (signo == SIGINT || signo == SIGTERM || signo == SIGUSR1){
     console_end();
-    uninit();
-    exit(0);
+    request_sketch_terminate();
   }
 }
 

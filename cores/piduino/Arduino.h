@@ -120,8 +120,11 @@ void uninit(void);
 
 typedef void *(*thread_fn)(void *);
 
+void request_sketch_terminate();
 int create_thread(thread_fn);
 int start_thread(thread_fn, void * arg);
+int start_named_thread(thread_fn fn, void * arg, const char *name);
+int create_named_thread(thread_fn fn, const char *name);
 void lock_thread(int index);
 void unlock_thread(int index);
 int elevate_prio(const int prio);

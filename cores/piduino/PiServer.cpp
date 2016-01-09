@@ -74,19 +74,26 @@ size_t PiServer::write(uint8_t *data, size_t len){
   return len;
 }
 
+void PiServer::stopAll(){
+  while(clients != NULL){
+    PiClient *d = clients;
+    clients = clients->next;
+    d->stop();
+    delete d;
+  }
+}
+
 PiClient PiServer::available(){
-  cleanup();
   if(!_listening)
     return PiClient();
 
   int n, i;
-  n = epoll_wait(pollfd, events, MAXEVENTS, 1);
+  n = epoll_wait(pollfd, events, MAXEVENTS, 10);
   for (i = 0; i < n; i++){
     if ((events[i].events & EPOLLERR) || (events[i].events & EPOLLHUP) || (!(events[i].events & EPOLLIN))){
       /* An error has occured on this fd, or the socket is not ready for reading (why were we notified then?) */
       //Serial.printf("epoll error on fd: %d\n", events[i].data.fd);
-      PiClient *c = clients;
-      while(c != NULL && c->fd() != events[i].data.fd) c = c->next;
+      PiClient *c = clientByFd(events[i].data.fd);
       if(c != NULL && !c->available()){
         c->stop();
       }
@@ -122,13 +129,13 @@ PiClient PiServer::available(){
          completely, as we are running in edge-triggered mode
          and won't get a notification again for the same
          data. */
-      PiClient *c = clients;
-      while(c != NULL && c->fd() != events[i].data.fd) c = c->next;
+      PiClient *c = clientByFd(events[i].data.fd);
       if(c != NULL && !c->available()){
         c->stop();
       }
     }
   }
+  cleanup();
 
   PiClient *c = clients;
   while(c != NULL){
@@ -172,12 +179,7 @@ void PiServer::begin(){
 }
 
 void PiServer::end(){
-  while(clients != NULL){
-    PiClient *d = clients;
-    clients = clients->next;
-    d->stop();
-    delete d;
-  }
+  stopAll();
   close(sockfd);
   sockfd = -1;
   _listening = false;

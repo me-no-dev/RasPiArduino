@@ -19,6 +19,7 @@
 
 #include "Arduino.h"
 #include "bcm2835_registers.h"
+#include <pthread.h>
 
 static pthread_mutex_t thread_mutexes[4];
 
@@ -27,6 +28,20 @@ int start_thread(thread_fn fn, void * arg){
     int fd = pthread_create(&myThread, NULL, fn, arg) ;
     pthread_detach(myThread);
     return fd;
+}
+
+//extern int pthread_setname_np (pthread_t __target_thread, __const char *__name) __THROW __nonnull ((2));
+
+int start_named_thread(thread_fn fn, void * arg, const char *name){
+    pthread_t myThread ;
+    int fd = pthread_create(&myThread, NULL, fn, arg) ;
+    pthread_setname_np(myThread, name);
+    pthread_detach(myThread);
+    return fd;
+}
+
+int create_named_thread(thread_fn fn, const char *name){
+  return start_named_thread(fn, NULL, name);
 }
 
 int create_thread(thread_fn fn){

@@ -35,42 +35,26 @@ void *isr_executor_task(void *isr_num){
     return 0;
 }
 
-//static volatile uint64_t isr_reg = 0;
-static volatile uint64_t isr_freg = 0;
-static volatile uint64_t isr_rreg = 0;
+static volatile uint64_t _pin_isr_reg = 0;
+static volatile uint64_t _pin_isr_last = 0;
 
 void isr_check(){
-  if(isr_freg != 0){
-    uint64_t isrfst = GPFEN0;
-    isrfst |= (uint64_t)GPFEN1 << 32;
-    if(isrfst != isr_freg){
-      GPFEN0 = isr_freg;
-      GPFEN1 = isr_freg >> 32;
-      int i = 0;
-      uint32_t changedfbits = isrfst ^ isr_freg;
-      while(changedfbits){
-        while(!(changedfbits & _BV(i))) i++;
-        changedfbits &= ~_BV(i);
+  if(_pin_isr_reg != 0){
+    uint64_t state = GPLEV0;
+    state |= (uint64_t)GPLEV1 << 32;
+    state &= _pin_isr_reg;
+    int i = 0;
+    uint32_t changed = state ^ _pin_isr_last;
+    if(changed){
+      _pin_isr_last = state;
+      while(changed){
+        while(!(changed & _BV(i))) i++;
+        changed &= ~_BV(i);
         isr_handler_t *handler = &isr_handlers[i];
-        if((handler->mode == FALLING || handler->mode == CHANGE) && handler->fn) {
+        if((state & _BV(i)) == 0 && (handler->mode == FALLING || handler->mode == CHANGE) && handler->fn) {
           start_thread(isr_executor_task, (void *)i);
         }
-      }
-    }
-  }
-  if(isr_rreg != 0){
-    uint64_t isrrst = GPREN0;
-    isrrst |= (uint64_t)GPREN1 << 32;
-    if(isrrst != isr_rreg){
-      GPREN0 = isr_rreg;
-      GPREN1 = isr_rreg >> 32;
-      int i = 0;
-      uint32_t changedrbits = isrrst ^ isr_rreg;
-      while(changedrbits){
-        while(!(changedrbits & _BV(i))) i++;
-        changedrbits &= ~_BV(i);
-        isr_handler_t *handler = &isr_handlers[i];
-        if((handler->mode == RISING || handler->mode == CHANGE) && handler->fn) {
+        else if((state & _BV(i)) != 0 && (handler->mode == RISING || handler->mode == CHANGE) && handler->fn) {
           start_thread(isr_executor_task, (void *)i);
         }
       }
@@ -83,39 +67,15 @@ void attachInterrupt(uint8_t pin, void (*userFunc)(void), int mode) {
     isr_handler_t *handler = &isr_handlers[pin];
     handler->mode = mode;
     handler->fn = userFunc;
-    if(mode == FALLING || mode == CHANGE){
-      isr_freg |= _BV(pin);
-      if(pin < 32) GPFEN0 = isr_freg & 0xFFFFFFFF;
-      else GPFEN1 = isr_freg >> 32;
-    }
-    if(mode == RISING|| mode == CHANGE){
-      isr_rreg |= _BV(pin);
-      if(pin < 32) GPREN0 = isr_rreg & 0xFFFFFFFF;
-      else GPREN1 = isr_rreg >> 32;
-    }
+    _pin_isr_last |= (digitalRead(pin) << pin);
+    _pin_isr_reg |= _BV(pin);
   }
 }
 
 void detachInterrupt(uint8_t pin) {
   if(pin < 46) {
     isr_handler_t *handler = &isr_handlers[pin];
-    
-    if(handler->mode == FALLING || handler->mode == CHANGE){
-      isr_freg &= ~_BV(pin);
-      if(pin < 32){
-        GPFEN0 = isr_freg & 0xFFFFFFFF;
-      } else {
-        GPFEN1 = isr_freg >> 32;
-      }
-    }
-    if(handler->mode == RISING|| handler->mode == CHANGE){
-      isr_rreg &= ~_BV(pin);
-      if(pin < 32){
-        GPREN0 = isr_rreg & 0xFFFFFFFF;
-      } else {
-        GPREN1 = isr_rreg >> 32;
-      }
-    }   
+    _pin_isr_reg &= ~_BV(pin);
     handler->mode = 0;
     handler->fn = 0;
   }
