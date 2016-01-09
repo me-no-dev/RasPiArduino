@@ -24,7 +24,7 @@
 #include <netdb.h>
 #include <linux/tcp.h>
 #include <sys/ioctl.h>
-#include "PiClient.h"
+#include "EthernetClient.h"
 
 int sock_connect(int fd, struct sockaddr *addr, size_t len){
   return connect(fd, addr, len);
@@ -38,10 +38,11 @@ int sock_read(int fd, void *data, size_t len){
   return read(fd, data, len);
 }
 
-PiClient::~PiClient(){
+EthernetClient::~EthernetClient(){
   //if(sockfd) close(sockfd);
 }
-int PiClient::connect(IPAddress ip, uint16_t port){
+
+int EthernetClient::connect(IPAddress ip, uint16_t port){
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0){
     return 0;
@@ -58,17 +59,17 @@ int PiClient::connect(IPAddress ip, uint16_t port){
   _connected = true;
   return 1;
 }
-int PiClient::connect(const char *host, uint16_t port){
+int EthernetClient::connect(const char *host, uint16_t port){
   struct hostent *server;
   server = gethostbyname(host);
   if (server == NULL)
     return 0;
   return connect(IPAddress((const uint8_t *)(server->h_addr)), port);
 }
-int PiClient::setSocketOption(int option, char* value, size_t len){
+int EthernetClient::setSocketOption(int option, char* value, size_t len){
   return setsockopt(sockfd, SOL_SOCKET, option, value, len);
 }
-int PiClient::setTimeout(uint32_t seconds){
+int EthernetClient::setTimeout(uint32_t seconds){
   struct timeval tv;
   tv.tv_sec = seconds;
   tv.tv_usec = 0;
@@ -76,26 +77,26 @@ int PiClient::setTimeout(uint32_t seconds){
     return -1;
   return setSocketOption(SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
 }
-int PiClient::setOption(int option, int *value){
+int EthernetClient::setOption(int option, int *value){
   return setsockopt(sockfd, IPPROTO_TCP, option, (char *)value, sizeof(int));
 }
-int PiClient::getOption(int option, int *value){
+int EthernetClient::getOption(int option, int *value){
   size_t size = sizeof(int);
   return getsockopt(sockfd, IPPROTO_TCP, option, (char *)value, &size);
 }
-int PiClient::setNoDelay(bool nodelay){
+int EthernetClient::setNoDelay(bool nodelay){
   int flag = nodelay;
   return setOption(TCP_NODELAY, &flag);
 }
-bool PiClient::getNoDelay(){
+bool EthernetClient::getNoDelay(){
   int flag = 0;
   getOption(TCP_NODELAY, &flag);
   return flag;
 }
-size_t PiClient::write(uint8_t data){
+size_t EthernetClient::write(uint8_t data){
   return write(&data, 1);
 }
-size_t PiClient::write(const uint8_t *buf, size_t size){
+size_t EthernetClient::write(const uint8_t *buf, size_t size){
   if(!_connected) return 0;
   int res = send(sockfd, (void*)buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
   if(res < 0){
@@ -104,7 +105,7 @@ size_t PiClient::write(const uint8_t *buf, size_t size){
   }
   return res;
 }
-int PiClient::read(){
+int EthernetClient::read(){
   uint8_t data = 0;
   int res = read(&data, 1);
   if(res < 0){
@@ -112,7 +113,7 @@ int PiClient::read(){
   }
   return data;
 }
-int PiClient::read(uint8_t *buf, size_t size){
+int EthernetClient::read(uint8_t *buf, size_t size){
   if(!_connected) return -1;
   int res = sock_read(sockfd, 0, 0);
   if(size && res == 0 && available()){
@@ -123,18 +124,47 @@ int PiClient::read(uint8_t *buf, size_t size){
   }
   return res;
 }
-int PiClient::available(){
+int EthernetClient::available(){
   int count;
   ioctl(sockfd, FIONREAD, &count);
   return count;
 }
-void PiClient::stop(){
-  close(sockfd);
+void EthernetClient::stop(){
+  if(sockfd > 0)
+    close(sockfd);
   _connected = false;
 }
-uint8_t PiClient::connected(){
+uint8_t EthernetClient::connected(){
   if(!_connected)
     return 0;
   read(0,0);
   return _connected;
+}
+
+IPAddress EthernetClient::remoteIP(int fd){
+  struct sockaddr_storage addr;
+  socklen_t len = sizeof addr;
+  getpeername(fd, (struct sockaddr*)&addr, &len);
+  struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+  return IPAddress((uint32_t)(s->sin_addr.s_addr));
+}
+
+uint16_t EthernetClient::remotePort(int fd){
+  struct sockaddr_storage addr;
+  socklen_t len = sizeof addr;
+  getpeername(fd, (struct sockaddr*)&addr, &len);
+  struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+  return ntohs(s->sin_port);
+}
+
+IPAddress EthernetClient::remoteIP(){
+  return remoteIP(sockfd);
+}
+
+uint16_t EthernetClient::remotePort(){
+  return remotePort(sockfd);
+}
+
+bool EthernetClient::operator==(const EthernetClient& rhs) {
+  return sockfd == rhs.sockfd && remotePort(sockfd) == remotePort(rhs.sockfd) && remoteIP(sockfd) == remoteIP(rhs.sockfd);
 }

@@ -23,35 +23,48 @@
 #include "Arduino.h"
 #include "Client.h"
 
-class PiClient : public Client {
+class EthernetClient : public Client {
   protected:
     int sockfd;
     bool _connected;
 
   public:
-    PiClient *next;
-    PiClient():sockfd(-1),_connected(false),next(NULL){}
-    PiClient(int fd):sockfd(fd),_connected(true),next(NULL){}
-    ~PiClient();
+    EthernetClient *next;
+    EthernetClient():sockfd(-1),_connected(false),next(NULL){}
+    EthernetClient(int fd):sockfd(fd),_connected(true),next(NULL){}
+    ~EthernetClient();
+    virtual int connect(IPAddress ip, uint16_t port);
+    virtual int connect(const char *host, uint16_t port);
+    virtual size_t write(uint8_t data);
+    virtual size_t write(const uint8_t *buf, size_t size);
+    virtual int available();
+    virtual int read();
+    virtual int read(uint8_t *buf, size_t size);
+    virtual int peek(){return 0;}
+    virtual void flush(){}
+    virtual void stop();
+    virtual uint8_t connected();
+    virtual operator bool(){ return connected(); }
+    virtual bool operator==(const bool value) { return bool() == value; }
+    virtual bool operator!=(const bool value) { return bool() != value; }
+    virtual bool operator==(const EthernetClient&);
+    virtual bool operator!=(const EthernetClient& rhs) { return !this->operator==(rhs); };
+
     int fd(){return sockfd;}
-    int connect(IPAddress ip, uint16_t port);
-    int connect(const char *host, uint16_t port);
+    IPAddress remoteIP();
+    uint16_t remotePort();
     int setSocketOption(int option, char* value, size_t len);
     int setOption(int option, int *value);
     int getOption(int option, int *value);
     int setTimeout(uint32_t seconds);
     int setNoDelay(bool nodelay);
     bool getNoDelay();
-    size_t write(uint8_t data);
-    size_t write(const uint8_t *buf, size_t size);
-    int read();
-    int read(uint8_t *buf, size_t size);
-    int available();
-    int peek(){return 0;}
-    void flush(){}
-    void stop();
-    uint8_t connected();
-    operator bool(){return connected();}
+
+    static IPAddress remoteIP(int fd);
+    static uint16_t remotePort(int fd);
+    
+    friend class EthernetServer;
+    using Print::write;
 };
 
 #endif

@@ -75,7 +75,7 @@ class Print{
     size_t println(unsigned long, int = DEC);
     size_t println(double, int = 2);
     size_t println(const Printable&);
-    size_t println(void);
+    virtual size_t println(void);
 };
 
 #endif

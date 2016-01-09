@@ -22,11 +22,11 @@
 
 #include "Arduino.h"
 #include "Server.h"
-#include "PiClient.h"
+#include "EthernetClient.h"
 
-typedef void(*PiServerHandler)(Client&);
+typedef void(*EthernetServerHandler)(Client&);
 
-class PiServer : public Server {
+class EthernetServer : public Server {
   private:
     int sockfd;
     int pollfd;
@@ -34,28 +34,29 @@ class PiServer : public Server {
     uint16_t _port;
     uint8_t _max_clients;
     bool _listening;
-    PiServerHandler _cb;
-    PiClient *clients;
+    EthernetServerHandler _cb;
+    EthernetClient *clients;
 
     //cleans all disconnected clients
     void cleanup();
     int setSocketOption(int option, char* value, size_t len);
 
   public:
-    PiServer(uint16_t port, uint8_t max_clients=8):sockfd(-1),pollfd(0),events(NULL),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL),clients(NULL){}
-    ~PiServer(){ end();}
-    operator bool(){return _listening;}
-    void begin();
-    void end();
-    PiClient available();
-    //Write data to all the clients connected to a server.
-    size_t write(uint8_t *data, size_t len);
-    size_t write(uint8_t data){
+    EthernetServer(uint16_t port, uint8_t max_clients=8):sockfd(-1),pollfd(0),events(NULL),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL),clients(NULL){}
+    ~EthernetServer(){ end();}
+    EthernetClient available();
+    virtual void begin();
+    virtual size_t write(const uint8_t *data, size_t len);
+    virtual size_t write(uint8_t data){
       return write(&data, 1);
     }
+    using Print::write;
+
+    void end();
+    operator bool(){return _listening;}
     int setTimeout(uint32_t seconds);
-    PiClient *clientByFd(int fd){
-      PiClient *c = clients;
+    EthernetClient *clientByFd(int fd){
+      EthernetClient *c = clients;
       while(c != NULL && c->fd() != fd) c = c->next;
       return c;
     }

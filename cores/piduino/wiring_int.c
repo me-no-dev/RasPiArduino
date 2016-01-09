@@ -26,17 +26,14 @@ typedef struct {
 } isr_handler_t;
 
 static isr_handler_t isr_handlers[64];
+static volatile uint64_t _pin_isr_reg = 0;
+static volatile uint64_t _pin_isr_last = 0;
 
 void *isr_executor_task(void *isr_num){
-  //elevate_prio(55);
   isr_handler_t *handler = &isr_handlers[(int)isr_num];
   handler->fn();
   pthread_exit(NULL);
-    return 0;
 }
-
-static volatile uint64_t _pin_isr_reg = 0;
-static volatile uint64_t _pin_isr_last = 0;
 
 void isr_check(){
   if(_pin_isr_reg != 0){

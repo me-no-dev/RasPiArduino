@@ -22,7 +22,7 @@
 
 #include "Stream.h"
 
-class HardwareSerial : public Stream{
+class HardwareSerial : public Stream {
   protected:
     
   public:

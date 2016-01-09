@@ -1,9 +1,9 @@
-#include <PiUdp.h>
-#include<arpa/inet.h>
-#include<sys/socket.h>
+#include <EthernetUdp.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <netdb.h>
 
-uint8_t PiUDP::begin(uint16_t port){
+uint8_t EthernetUDP::begin(uint16_t port){
   if(udp_server)
     stop();
   if ((udp_server=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
@@ -21,14 +21,14 @@ uint8_t PiUDP::begin(uint16_t port){
   return 1;
 }
 
-void PiUDP::stop(){
+void EthernetUDP::stop(){
   if(udp_server == -1)
     return;
   close(udp_server);
   udp_server = -1;
 }
 
-int PiUDP::beginPacket(){
+int EthernetUDP::beginPacket(){
   if(!remote_port)
     return 0;
   buffer_len = 0;
@@ -36,13 +36,13 @@ int PiUDP::beginPacket(){
   return 1;
 }
 
-int PiUDP::beginPacket(IPAddress ip, uint16_t port){
+int EthernetUDP::beginPacket(IPAddress ip, uint16_t port){
   remote_ip = ip;
   remote_port = port;
   return beginPacket();
 }
 
-int PiUDP::beginPacket(const char *host, uint16_t port){
+int EthernetUDP::beginPacket(const char *host, uint16_t port){
   struct hostent *server;
   server = gethostbyname(host);
   if (server == NULL)
@@ -50,7 +50,7 @@ int PiUDP::beginPacket(const char *host, uint16_t port){
   return beginPacket(IPAddress((const uint8_t *)(server->h_addr_list[0])), port);
 }
 
-int PiUDP::endPacket(){
+int EthernetUDP::endPacket(){
   struct sockaddr_in recipient;
   recipient.sin_addr.s_addr = (uint32_t)remote_ip;
   recipient.sin_family = AF_INET;
@@ -58,7 +58,7 @@ int PiUDP::endPacket(){
   return sendto(udp_server, buffer, buffer_len, 0, (struct sockaddr*) &recipient, sizeof(recipient));
 }
 
-size_t PiUDP::write(uint8_t data){
+size_t EthernetUDP::write(uint8_t data){
   if(buffer_len == 1500){
     endPacket();
     buffer_len = 0;
@@ -68,14 +68,14 @@ size_t PiUDP::write(uint8_t data){
   return 1;
 }
 
-size_t PiUDP::write(const uint8_t *buffer, size_t size){
+size_t EthernetUDP::write(const uint8_t *buffer, size_t size){
   size_t i;
   for(i=0;i<size;i++)
     write(buffer[i]);
   return i;
 }
 
-int PiUDP::parsePacket(){
+int EthernetUDP::parsePacket(){
   if(rx_buffer)
     return 0;
   struct sockaddr_in si_other;
@@ -92,12 +92,12 @@ int PiUDP::parsePacket(){
   return len;
 }
 
-int PiUDP::available(){
+int EthernetUDP::available(){
   if(!rx_buffer) return 0;
   return rx_buffer->getSize();
 }
 
-int PiUDP::read(){
+int EthernetUDP::read(){
   if(!rx_buffer) return -1;
   int out = rx_buffer->read();
   if(!rx_buffer->getSize()){
@@ -108,11 +108,11 @@ int PiUDP::read(){
   return out;
 }
 
-int PiUDP::read(unsigned char* buffer, size_t len){
+int EthernetUDP::read(unsigned char* buffer, size_t len){
   return read((char *)buffer, len);
 }
 
-int PiUDP::read(char* buffer, size_t len){
+int EthernetUDP::read(char* buffer, size_t len){
   if(!rx_buffer) return 0;
   int out = rx_buffer->read(buffer, len);
   if(!rx_buffer->getSize()){
@@ -123,21 +123,21 @@ int PiUDP::read(char* buffer, size_t len){
   return out;
 }
 
-int PiUDP::peek(){
+int EthernetUDP::peek(){
   if(!rx_buffer) return -1;
   return rx_buffer->peek();
 }
 
-void PiUDP::flush(){
+void EthernetUDP::flush(){
   cbuf *b = rx_buffer;
   rx_buffer = 0;
   delete b;
 }
 
-IPAddress PiUDP::remoteIP(){
+IPAddress EthernetUDP::remoteIP(){
   return remote_ip;
 }
 
-uint16_t PiUDP::remotePort(){
+uint16_t EthernetUDP::remotePort(){
   return remote_port;
 }
