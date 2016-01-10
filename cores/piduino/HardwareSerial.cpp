@@ -30,9 +30,11 @@
 #define UART_BUFFER_SIZE 1024
 
 static cbuf _rx_buffer(1024);
+static volatile bool _uart_check_run = false;
 
 //called by the interrupt check thread
 void uart_check_fifos(){
+  if(!_uart_check_run) return;
   while((UART0FR & (1 << UART0RXFE)) == 0)
     _rx_buffer.write(UART0DR);
 }
@@ -51,9 +53,11 @@ void HardwareSerial::begin(uint32_t baud){
   UART0FBRD = divider & 0x3F;
   UART0LCRH = (UART0WLEN_8BIT << UART0WLEN) | _BV(UART0FEN);
   UART0CR   = _BV(UART0EN) | _BV(UART0TXE) | _BV(UART0RXE);
+  _uart_check_run = true;
 }
 
 void HardwareSerial::end(){
+  _uart_check_run = false;
   UART0LCRH = 0;
   UART0CR = 0;
   pinMode(14, GPFI); // TXD

@@ -20,31 +20,42 @@
 #include "Arduino.h"
 #include "idemonitor.h"
 
+String shell(const char *cmd, int *result){
+  String buf = "";
+  char str[strlen(cmd)+6];
+  int rs;
+  int *r = result;
+  if(r == NULL)
+    r = &rs;
+  r[0] = -1;
+  strcpy(str, cmd);
+  strcat(str, " 2>&1");
+  FILE *in = popen(str, "r");
+  if(!in)
+    return String();
+  int c = 0;
+  while((c = fgetc(in)) > 0)
+    buf += (char)c;
+  r[0] = pclose(in);
+  return buf;
+}
+
 volatile uint8_t _keep_sketch_running;
 volatile uint8_t _loop_is_running;
+pthread_t _loop_thread;
 
 void request_sketch_terminate(){
   _keep_sketch_running = 0;
 }
 
-void *_loop_thread(void *arg){
+void *_loop_thread_task(void *arg){
   _loop_is_running = 1;
   setup();
   while(_keep_sketch_running) {
     loop();
     usleep(300);
   }
-  //maybe do something before we exit?
   _loop_is_running = 0;
-  pthread_exit(NULL);
-}
-
-void *_pin_isr_thread(void *arg){
-  _loop_is_running = 1;
-  while(_keep_sketch_running) {
-    isr_check();
-    usleep(200);
-  }
   pthread_exit(NULL);
 }
 
@@ -63,19 +74,18 @@ __attribute__((constructor(101))) void startInit() {
 int main(int argc, char **argv){
   _keep_sketch_running = 1;
   _loop_is_running = 0;
-  //elevate_prio(55);
-  idemonitor_begin();
   console_attach_signal_handlers();
-  create_named_thread(_loop_thread,"arduino-loop");
-  create_named_thread(_pin_isr_thread,"arduino-isr");
-  while(_keep_sketch_running) {
+  idemonitor_begin();
+  if(pthread_create(&_loop_thread, NULL, _loop_thread_task, NULL) == 0){
+    pthread_setname_np(_loop_thread, "arduino-loop");
+    pthread_detach(_loop_thread);
+  }
+  while(_loop_is_running){
+    console_run();
     uart_check_fifos();
     idemonitor_run();
-    console_run();
     usleep(1000);
   }
-  while(_loop_is_running)
-    usleep(300);
   uninit();
   return 0;
 }

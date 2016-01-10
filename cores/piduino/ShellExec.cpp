@@ -27,6 +27,16 @@ int shell_read(int fd, void *data, size_t len){
   return read(fd, data, len);
 }
 
+int shell_write(int fd, void *data, size_t len){
+  return write(fd, data, len);
+}
+
+void *_shell_exec_thread(void *arg){
+  ShellExec *caller = (ShellExec*)arg;
+  caller->execute();
+  pthread_exit(NULL);
+}
+
 void ShellExec::setBuffer(const char *data, size_t len){
   cbuf *b = buffer;
   buffer =  new cbuf(len);
@@ -34,66 +44,134 @@ void ShellExec::setBuffer(const char *data, size_t len){
   buffer->write(data, len);
 }
 
-ShellExec::ShellExec(const char *cmd[], size_t len){
+void ShellExec::execute(){
+  executed = true;
+  thread_running = true;
   success = false;
-  buffer = NULL;
-  int fd[2], childpid;
-  int st;
-  pipe(fd);
-  if ((childpid = fork()) == -1){
-    const char * ferr = "Fork Failed\r\n";
-    setBuffer(ferr, strlen(ferr));
+  pipe(pipes.in.pipes);
+  pipe(pipes.out.pipes);
+  pipe(pipes.err.pipes);
+  exec_pid = fork();
+
+  //fork failed
+  if(exec_pid == -1){
+    thread_running = false;
     return;
-  } else if( childpid == 0) {
-     close(1);
-     close(2);
-     dup2(fd[1], 1);
-     dup2(fd[1], 2);
-     close(fd[0]);
-     if(execvp((char *)(cmd[0]), (char * const *)cmd) < 0){
-       const char * eerr = "Exec Failed\r\n";
-       setBuffer(eerr, strlen(eerr));
-     }
-  } else {
-    waitpid(childpid, &st, WUNTRACED | WCONTINUED);
-    char result[len];
-    int read_len;
-    read_len = shell_read(fd[0], result, len);
-    if (read_len > 0){
-      setBuffer(result, read_len);
+  }
+
+  if(exec_pid == 0){
+    close(0);
+    close(1);
+    close(2);
+    dup2(pipes.in.read,   0);//stdin
+    dup2(pipes.out.write, 1);//stdout
+    dup2(pipes.err.write, 2);//stderr
+    close(pipes.in.read);
+    close(pipes.out.write);
+    close(pipes.err.write);
+    if(execvp((char *)(command[0]), (char * const *)command) < 0){
+      const char * eerr = "Exec Failed\r\n";
+      shell_write(pipes.err.write, (void *)eerr, strlen(eerr));
     }
-    success = st == 0;
+  } else {
+    waitpid(exec_pid, &exec_result, WUNTRACED | WCONTINUED);
+    success = exec_result == 0;
+    thread_running = false;
   }
 }
 
-ShellExec::ShellExec(const char *cmd, size_t len){
-  success = false;
-  buffer =  NULL;
-  int fd[2], childpid;
-  int st;
-  pipe(fd);
-  if ((childpid = fork()) == -1){
-    const char * ferr = "Fork Failed\r\n";
-    setBuffer(ferr, strlen(ferr));
+void ShellExec::executeAsync(){
+  if(thread_running)
     return;
-  } else if( childpid == 0) {
-     close(1);
-     close(2);
-     dup2(fd[1], 1);
-     dup2(fd[1], 2);
-     close(fd[0]);
-     if(execlp("sh", "sh", "-c", cmd, NULL) < 0){
-       const char * eerr = "Exec Failed\r\n";
-       setBuffer(eerr, strlen(eerr));
-     }
-  } else {
-    waitpid(childpid, &st, WUNTRACED | WCONTINUED);
-    char result[len];
-    int read_len;
-    read_len = shell_read(fd[0], result, len);
-    if (read_len > 0){
-      setBuffer(result, read_len);
-    }
-    success = st == 0;
+  thread_running = pthread_create(&thread, NULL, _shell_exec_thread, (void*)this) == 0;
+  if(!thread_running)
+    return;
+  pthread_setname_np(thread, "arduino-shell");
+  pthread_detach(thread);
+}
+
+bool ShellExec::running(){
+  if(thread_running)
+    pthread_yield();
+  return thread_running;
+}
+
+int ShellExec::available(){
+  if(!executed) return -1;
+  int count;
+  ioctl(pipes.out.read, FIONREAD, &count);
+  return count;
+}
+
+int ShellExec::read(){
+  if(!executed || !available())
+    return -1;
+  char data;
+  if(shell_read(pipes.out.read, &data, 1) == 1){
+    return data;
   }
+  return -1;
+}
+
+int ShellExec::read(char * buf, size_t len){
+  if(!executed) return -1;
+  int a = available();
+  if(a<0 || !a) return -1;
+  if((size_t)a < len) len = a;
+  return shell_read(pipes.out.read, buf, len);
+}
+
+int ShellExec::errAvailable(){
+  if(!executed) return -1;
+  int count;
+  ioctl(pipes.err.read, FIONREAD, &count);
+  return count;
+}
+
+int ShellExec::errRead(){
+  if(!executed || !errAvailable())
+    return -1;
+  char data;
+  if(shell_read(pipes.err.read, &data, 1) == 1){
+    return data;
+  }
+  return -1;
+}
+
+int ShellExec::errRead(char * buf, size_t len){
+  if(!executed) return -1;
+  int a = errAvailable();
+  if(a<0 || !a) return -1;
+  if((size_t)a < len) len = a;
+  return shell_read(pipes.err.read, buf, len);
+}
+
+size_t ShellExec::write(uint8_t data){
+  return shell_write(pipes.in.write, &data, 1);
+}
+
+size_t ShellExec::write(uint8_t *data, size_t len){
+  return shell_write(pipes.in.write, data, len);
+}
+
+ShellExec::ShellExec(const char **cmd){
+  buffer = NULL;
+  success = false;
+  executed = false;
+  command = cmd;
+  exec_pid = -1;
+  exec_result = -1;
+  thread = -1;
+  thread_running = false;
+}
+
+ShellExec::ShellExec(const char *cmd){
+  buffer = NULL;
+  success = false;
+  executed = false;
+  command = {"sh", "-c", cmd};
+  exec_pid = -1;
+  exec_result = -1;
+  thread = -1;
+  thread_running = false;
 }

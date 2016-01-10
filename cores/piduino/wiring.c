@@ -20,7 +20,30 @@
 #define ARDUINO_MAIN
 
 #include "Arduino.h"
-void delayMicroseconds(uint32_t m){ if(m>450) usleep(m); else halt(m); }
+
+static inline void _halt(uint32_t microseconds){
+  uint32_t start = STCLO;
+  uint32_t compare = start + microseconds;
+  if(compare < start)
+    while(STCLO - compare);
+  else
+    while(STCLO < compare);
+}
+
+void sleepMicroseconds(uint32_t m){
+  usleep(m);
+}
+
+void delay(uint32_t m){
+  while(m--) usleep(1000);
+}
+
+void delayMicroseconds(uint32_t m){
+  if(m < 1000)
+    return _halt(m);
+  usleep(m);
+}
+
 void analogReference(uint8_t mode){}
 int analogRead(uint8_t pin){ return 0; }
 

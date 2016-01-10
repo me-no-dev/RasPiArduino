@@ -29,10 +29,10 @@ void pinMode(uint8_t pin, uint8_t mode){
     mode &= 0x30;
     mode >>= 4;
     GPPUD = mode;
-    halt(10);
+    delayMicroseconds(10);
     if(pin < 32) GPPUDCLK0 = _BV(pin);
     else if(pin < 46) GPPUDCLK1 = _BV(pin - 32);
-    halt(10);
+    delayMicroseconds(10);
     GPPUD = 0;
     if(pin < 32) GPPUDCLK0 = 0;
     else if(pin < 46) GPPUDCLK1 = 0;

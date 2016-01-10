@@ -726,15 +726,6 @@ static inline void border_clr_bit(volatile uint32_t reg, uint8_t bit){
   border_clr_mask(reg, 1 << bit);
 }
 
-static inline void halt(uint32_t microseconds){
-  uint32_t start = STCLO;
-  uint32_t compare = start + microseconds;
-  if(compare < start)
-    while(STCLO - compare);
-  else
-    while(STCLO < compare);
-}
-
 #ifdef __cplusplus
 }
 #endif

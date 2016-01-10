@@ -21,45 +21,59 @@
 #include "bcm2835_registers.h"
 #include <pthread.h>
 
-static pthread_mutex_t thread_mutexes[4];
+static pthread_mutex_t thread_mutexes[10];
 
-int start_thread(thread_fn fn, void * arg){
+void thread_yield(){
+  pthread_yield();
+}
+
+pthread_t thread_self(){
+  return pthread_self();
+}
+
+pthread_t thread_create(thread_fn fn, void * arg){
     pthread_t myThread ;
-    int fd = pthread_create(&myThread, NULL, fn, arg) ;
+    if(pthread_create(&myThread, NULL, fn, arg) != 0)
+      return 0;
     pthread_detach(myThread);
-    return fd;
+    return myThread;
 }
 
-//extern int pthread_setname_np (pthread_t __target_thread, __const char *__name) __THROW __nonnull ((2));
-
-int start_named_thread(thread_fn fn, void * arg, const char *name){
-    pthread_t myThread ;
-    int fd = pthread_create(&myThread, NULL, fn, arg) ;
-    pthread_setname_np(myThread, name);
-    pthread_detach(myThread);
-    return fd;
+int thread_set_name(pthread_t t, const char *name){
+  return pthread_setname_np(t, name);
 }
 
-int create_named_thread(thread_fn fn, const char *name){
-  return start_named_thread(fn, NULL, name);
+int thread_set_priority(const int pri){
+  struct sched_param sched ;
+  memset (&sched, 0, sizeof(sched)) ;
+  if (pri > sched_get_priority_max(SCHED_RR))
+    sched.sched_priority = sched_get_priority_max(SCHED_RR);
+  else
+    sched.sched_priority = pri ;
+  return sched_setscheduler(0, SCHED_RR, &sched) ;
 }
 
-int create_thread(thread_fn fn){
-  return start_thread(fn, NULL);
+int thread_detach(pthread_t t){
+  return pthread_detach(t);
 }
 
-void lock_thread(int index){
+int thread_terminate(pthread_t t){
+  return pthread_cancel(t);
+}
+
+uint8_t thread_running(pthread_t t){
+  int r = pthread_tryjoin_np(t, NULL);
+  return (r==0 || r==EBUSY);
+}
+
+uint8_t thread_equals(pthread_t t){
+  return pthread_equal(pthread_self(),t);
+}
+
+void thread_lock(int index){
   pthread_mutex_lock(&thread_mutexes[index]);
 }
 
-void unlock_thread(int index){
+void thread_unlock(int index){
     pthread_mutex_unlock(&thread_mutexes[index]);
-}
-
-int elevate_prio(const int pri){
-  struct sched_param sched ;
-  memset (&sched, 0, sizeof(sched)) ;
-  if (pri > sched_get_priority_max(SCHED_RR)) sched.sched_priority = sched_get_priority_max(SCHED_RR);
-  else sched.sched_priority = pri ;
-  return sched_setscheduler(0, SCHED_RR, &sched) ;
 }

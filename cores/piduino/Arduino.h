@@ -112,8 +112,9 @@ typedef uint8_t byte;
 
 #define micros() (unsigned long)(STCV)
 #define millis() (unsigned long)(STCV / 1000)
-#define delay(m) usleep(m * 1000)
 void delayMicroseconds(uint32_t m);
+void delay(uint32_t m);
+void sleepMicroseconds(uint32_t m);
 
 int init(void);
 void uninit(void);
@@ -121,13 +122,19 @@ void uninit(void);
 typedef void *(*thread_fn)(void *);
 
 void request_sketch_terminate();
-int create_thread(thread_fn);
-int start_thread(thread_fn, void * arg);
-int start_named_thread(thread_fn fn, void * arg, const char *name);
-int create_named_thread(thread_fn fn, const char *name);
-void lock_thread(int index);
-void unlock_thread(int index);
-int elevate_prio(const int prio);
+
+void      thread_yield();
+pthread_t thread_self();
+pthread_t thread_create(thread_fn fn, void * arg);
+int       thread_set_name(pthread_t t, const char *name);
+int       thread_set_priority(const int pri);
+int       thread_detach(pthread_t t);
+int       thread_terminate(pthread_t t);
+uint8_t   thread_running(pthread_t t);
+uint8_t   thread_equals(pthread_t t);
+void      thread_lock(int index);
+void      thread_unlock(int index);
+#define yield() thread_yield()
 
 void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);//47.5ns direct register write takes 23ns
@@ -148,7 +155,6 @@ uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder);
 
 typedef void (*voidFuncPtr)(void);
 
-void isr_check(void);
 void attachInterrupt(uint8_t, void (*)(void), int mode);
 void detachInterrupt(uint8_t);
 
@@ -181,6 +187,8 @@ long random(long);
 long random(long, long);
 void randomSeed(unsigned long);
 long map(long, long, long, long, long);
+
+String shell(const char *cmd, int *result);
 #endif
 
 #include "binary.h"
