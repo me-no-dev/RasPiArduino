@@ -55,10 +55,7 @@ void setup() {
   digitalWrite(13, HIGH);
 
   // using A0 and A2 as vcc and gnd for the TMP36 sensor:
-  pinMode(A0, OUTPUT);
-  pinMode(A2, OUTPUT);
-  digitalWrite(A0, HIGH);
-  digitalWrite(A2, LOW);
+
 
   // Listen for incoming connection only from localhost
   // (no one from the external network could connect)
@@ -96,7 +93,7 @@ void loop() {
         timeString += c;
       }
       Serial.println(timeString);
-      int sensorValue = analogRead(A1);
+      int sensorValue = analogRead(0);
       // convert the reading to millivolts:
       float voltage = sensorValue * (5000.0f / 1024.0f);
       // convert the millivolts to temperature celsius:

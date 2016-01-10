@@ -45,11 +45,13 @@ class ShellExec: public Stream {
   private:
     cbuf * buffer;
     bool   success;
+    void setBuffer(const char *data, size_t len);
   public:
     operator bool(){ return success; }
-    ShellExec(const char* cmd, size_t len=4096);
+    ShellExec(const char *cmd, size_t expected_len=4096);
+    ShellExec(const char *cmd[], size_t expected_len=4096);
     ~ShellExec(){
-      delete buffer;
+      if(buffer != NULL) delete buffer;
     }
     int available(){
       return buffer->getSize();

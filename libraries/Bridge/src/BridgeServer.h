@@ -42,9 +42,12 @@ class BridgeServer : public Server {
     int setSocketOption(int option, char* value, size_t len);
 
   public:
-    BridgeServer(uint16_t port, uint8_t max_clients=8):sockfd(-1),pollfd(0),events(NULL),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL),clients(NULL){}
+    void listenOnLocalhost(){}
+
+    BridgeServer(uint16_t port=80, uint8_t max_clients=8):sockfd(-1),pollfd(0),events(NULL),_port(port),_max_clients(max_clients),_listening(false),_cb(NULL),clients(NULL){}
     ~BridgeServer(){ end();}
     BridgeClient available();
+    BridgeClient accept(){return available();}
     virtual void begin();
     virtual size_t write(const uint8_t *data, size_t len);
     virtual size_t write(uint8_t data){

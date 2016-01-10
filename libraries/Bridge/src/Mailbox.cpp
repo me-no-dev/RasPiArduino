@@ -18,7 +18,7 @@
 
 #include <Mailbox.h>
 
-unsigned int MailboxClass::readMessage(uint8_t *buff, unsigned int size) {}
+unsigned int MailboxClass::readMessage(uint8_t *buff, unsigned int size) { return 0; }
 
 void MailboxClass::readMessage(String &str, unsigned int maxLength) {}
 

@@ -44,7 +44,7 @@ class BridgeClass {
 // This subclass uses a serial port Stream
 class SerialBridgeClass : public BridgeClass {
   public:
-    SerialBridgeClass(HardwareSerial &_serial) : BridgeClass(_serial) {
+    SerialBridgeClass(Stream &_serial) : BridgeClass(_serial) {
       // Empty
     }
     void begin(unsigned long baudrate=0) {

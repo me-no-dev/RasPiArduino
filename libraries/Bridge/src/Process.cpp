@@ -44,6 +44,8 @@ void Process::addParameter(const String &param) {}
 
 void Process::runAsynchronously() {}
 
+void Process::close() {}
+
 boolean Process::running() {
   return false;
 }
@@ -58,8 +60,6 @@ unsigned int Process::run() {
     delay(100);
   return exitValue();
 }
-
-void Process::close() {}
 
 unsigned int Process::runShellCommand(const String &command) {
   runShellCommandAsynchronously(command);
