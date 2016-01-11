@@ -18,7 +18,7 @@
 */
 
 #include "Arduino.h"
-#include "console.h"
+#include "Console.h"
 
 #include <stdio.h>
 #include <stdlib.h>

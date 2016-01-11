@@ -20,7 +20,7 @@
 #include "Arduino.h"
 #include "idemonitor.h"
 
-String shell(const char *cmd, int *result){
+String shellExec(const char *cmd, int *result){
   String buf = "";
   char str[strlen(cmd)+6];
   int rs;

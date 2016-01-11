@@ -171,9 +171,6 @@ void uart_check_fifos();
 #include "WCharacter.h"
 #include "WString.h"
 #include "HardwareSerial.h"
-#include "console.h"
-#include "LinuxConsole.h"
-#include "ShellExec.h"
 
 uint16_t makeWord(uint16_t w);
 uint16_t makeWord(byte h, byte l);
@@ -188,9 +185,10 @@ long random(long, long);
 void randomSeed(unsigned long);
 long map(long, long, long, long, long);
 
-String shell(const char *cmd, int *result);
+String shellExec(const char *cmd, int *result);
 #endif
 
+#include "Console.h"
 #include "binary.h"
 #include "pins_arduino.h"
 

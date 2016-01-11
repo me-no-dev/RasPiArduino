@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include "Arduino.h"
 
-#include "LinuxConsole.h"
+#include "Console.h"
 #include "idemonitor.h"
 
 void LinuxConsole::begin(){

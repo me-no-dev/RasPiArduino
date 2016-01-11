@@ -51,10 +51,10 @@ void *_isr_check_task(void *arg){
         changed &= ~_BV(i);
         isr_handler_t *handler = &isr_handlers[i];
         if((state & _BV(i)) == 0 && (handler->mode == FALLING || handler->mode == CHANGE) && handler->fn) {
-          thread_start(isr_executor_task, (void *)i);
+          thread_create(isr_executor_task, (void *)i);
         }
         else if((state & _BV(i)) != 0 && (handler->mode == RISING || handler->mode == CHANGE) && handler->fn) {
-          thread_start(isr_executor_task, (void *)i);
+          thread_create(isr_executor_task, (void *)i);
         }
       }
     }
