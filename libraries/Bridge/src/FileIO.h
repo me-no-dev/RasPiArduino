@@ -20,18 +20,24 @@
 #define __FILEIO_H__
 
 #include <Process.h>
+#include <dirent.h>
 
-#define FILE_READ 0
-#define FILE_WRITE 1
-#define FILE_APPEND 2
+#define FILE_READ "r"
+#define FILE_WRITE "r+"
+#define FILE_APPEND "a"
+#define FILE_CREATE "w+"
 
 namespace BridgeLib {
 
 class File : public Stream {
+  private:
+    FILE *_file;
+    DIR  *_dir;
+    char *_name;
 
   public:
     File(BridgeClass &b = Bridge);
-    File(const char *_filename, uint8_t _mode, BridgeClass &b = Bridge);
+    File(const char *_filename, const char * _mode, BridgeClass &b = Bridge);
     ~File();
 
     virtual size_t write(uint8_t);
@@ -48,7 +54,7 @@ class File : public Stream {
     operator bool();
     const char * name();
     boolean isDirectory();
-    File openNextFile(uint8_t mode = FILE_READ);
+    File openNextFile(const char * mode = FILE_READ);
     void rewindDirectory(void);
 
     //using Print::write;
@@ -56,15 +62,14 @@ class File : public Stream {
 
 class FileSystemClass {
   public:
-    FileSystemClass() { }
-    FileSystemClass(BridgeClass &_b) { }
+    FileSystemClass(BridgeClass &_b = Bridge) { }
 
     boolean begin();
 
     // Open the specified file/directory with the supplied mode (e.g. read or
     // write, etc). Returns a File object for interacting with the file.
     // Note that currently only one file can be open at a time.
-    File open(const char *filename, uint8_t mode = FILE_READ);
+    File open(const char *filename, const char * mode = FILE_READ);
 
     // Methods to determine if the requested file path exists.
     boolean exists(const char *filepath);
