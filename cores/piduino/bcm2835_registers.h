@@ -59,11 +59,11 @@
 #define BCM2835_BASE PI1_BCMBASE
 
 #define BCM2835_ST_BASE     (BCM2835_BASE | 0x00003000) /* System Timer */
-#define BCM2835_IRQ_BASE    (BCM2835_BASE | 0x0000B000)  /* Interrupt control block */
+#define BCM2835_IRQ_BASE    (BCM2835_BASE | 0x0000B000) /* Interrupt control block */
 #define BCM2835_PM_BASE     (BCM2835_BASE | 0x00100000) /* Power Management, Reset controller and Watchdog registers */
 #define BCM2835_CM_BASE     (BCM2835_BASE | 0x00101000) /* GPIO Clock Registers */
 #define BCM2835_GPIO_BASE   (BCM2835_BASE | 0x00200000) /* GPIO */
-#define BCM2835_UART0_BASE  (BCM2835_BASE | 0x00201000)  /* UART0 */
+#define BCM2835_UART0_BASE  (BCM2835_BASE | 0x00201000) /* UART0 */
 #define BCM2835_PCM_BASE    (BCM2835_BASE | 0x00203000) /* I2S */
 #define BCM2835_SPI0_BASE   (BCM2835_BASE | 0x00204000) /* SPI0 */
 #define BCM2835_BSC0_BASE   (BCM2835_BASE | 0x00205000) /* BSC0 I2C/TWI (I2C0)*/
@@ -75,18 +75,18 @@
 //everything below is available after successful init_registers() call
 
 #define BCM2835_CORE_CLK_HZ        250000000  ///< 250 MHz Not true! this is the clock for i2c and spi, uart is 3MHz
-#define BCM2835_REG(a, b) *(((volatile uint32_t *)((a) + ((b) >> 2))))
+#define BCM2835_REG(a, b) *(((volatile uint32_t *)((a) + ((b) / 4))))
 #define F_CPU                           (BCM2835_CORE_CLK_HZ)
 #define _BV(a) (1 << (a))
 
 // Defines for ST
-#define STCS        BCM2835_REG(bcmreg_st, 0x0000) ///< System Timer Control/Status
+#define STCS         BCM2835_REG(bcmreg_st, 0x0000) ///< System Timer Control/Status
 #define STCLO        BCM2835_REG(bcmreg_st, 0x0004) ///< System Timer Counter Lower 32 bits
 #define STCHI        BCM2835_REG(bcmreg_st, 0x0008) ///< System Timer Counter Upper 32 bits
-#define STC0        BCM2835_REG(bcmreg_st, 0x000C) ///< System Timer Compare 0
-#define STC1        BCM2835_REG(bcmreg_st, 0x0010) ///< System Timer Compare 1
-#define STC2        BCM2835_REG(bcmreg_st, 0x0014) ///< System Timer Compare 2
-#define STC3        BCM2835_REG(bcmreg_st, 0x0018) ///< System Timer Compare 3
+#define STC0         BCM2835_REG(bcmreg_st, 0x000C) ///< System Timer Compare 0
+#define STC1         BCM2835_REG(bcmreg_st, 0x0010) ///< System Timer Compare 1
+#define STC2         BCM2835_REG(bcmreg_st, 0x0014) ///< System Timer Compare 2
+#define STC3         BCM2835_REG(bcmreg_st, 0x0018) ///< System Timer Compare 3
 
 #define STM3          3 //System Timer Match 3
 #define STM2          2 //System Timer Match 2
@@ -99,7 +99,7 @@
 #define IRQPB        BCM2835_REG(bcmreg_irq, 0x0200) ///< IRQ Basic pending
 #define IRQP1        BCM2835_REG(bcmreg_irq, 0x0204) ///< IRQ Pending 1
 #define IRQP2        BCM2835_REG(bcmreg_irq, 0x0208) ///< IRQ Pending 2
-#define FIQ         BCM2835_REG(bcmreg_irq, 0x020C) ///< FIQ Control Register
+#define FIQ          BCM2835_REG(bcmreg_irq, 0x020C) ///< FIQ Control Register
 #define IRQS1        BCM2835_REG(bcmreg_irq, 0x0210) ///< Enable IRQs 1
 #define IRQS2        BCM2835_REG(bcmreg_irq, 0x0214) ///< Enable IRQs 2
 #define IRQSB        BCM2835_REG(bcmreg_irq, 0x0218) ///< Enable Basic IRQs
@@ -166,19 +166,19 @@
 #define GPDIVF          0 // 12 bits fractional part of divisor 0-4095
 #define GPDIVI          12 // 12 bits integer part of divisor 0-4095
 
-#define GPSRC_GND      0x00 // 0
-#define GPSRC_OSC      0x01 // 19.2 MHz
-#define GPSRC_TDBG0    0x02 // 0
-#define GPSRC_TDBG1    0x03 // 0
-#define GPSRC_PLLA    0x04 // 0
-#define GPSRC_PLLC    0x05 // 1000 MHz (changes with overclock settings)
-#define GPSRC_PLLD    0x06 // 500 MHz Used by ETH clock
-#define GPSRC_HDMI    0x07 // 216 MHz
+#define GPSRC_GND       0x00 // 0
+#define GPSRC_OSC       0x01 // 19.2 MHz
+#define GPSRC_TDBG0     0x02 // 0
+#define GPSRC_TDBG1     0x03 // 0
+#define GPSRC_PLLA      0x04 // 0
+#define GPSRC_PLLC      0x05 // 1000 MHz (changes with overclock settings)
+#define GPSRC_PLLD      0x06 // 500 MHz Used by ETH clock
+#define GPSRC_HDMI      0x07 // 216 MHz
 
-#define GPF_OSC      19200000
-#define GPF_PLLC     1000000000
-#define GPF_PLLD     500000000
-#define GPF_HDMI     216000000
+#define GPF_OSC         19200000
+#define GPF_PLLC        1000000000
+#define GPF_PLLD        500000000
+#define GPF_HDMI        216000000
 
 #define GPDIV2F(c,d)  ((c << 12)/d)
 #define GPF2DIV(c,f)  (((c << 12)/f) & 0xFFFFFF)
@@ -217,6 +217,8 @@
 
 #define GPFSEL(p)       BCM2835_REG(bcmreg_gpio + (p/10), 0x0000)
 #define GPFSELB(p)      ((p % 10) * 3)
+#define GPFSELIN(pin)   do { GPFSEL(pin) &= ~(0x07 << GPFSELB(pin)); GPPUD = 0; } while(0)
+#define GPFSELOUT(pin)  do { GPFSEL(pin) = (GPFSEL(pin) & ~(0x07 << GPFSELB(pin))) | (1 << GPFSELB(pin)); } while(0)
 
 #define GPFI        0x00   ///< Input
 #define GPFO      0x01   ///< Output
@@ -230,6 +232,48 @@
 #define GPPO         0x00   ///< Off ? disable pull-up/down
 #define GPPD         0x01   ///< Enable Pull Down control
 #define GPPU          0x02   ///< Enable Pull Up control
+
+//PWM registers
+#define PWMCTL       BCM2835_REG(bcmreg_pwm, 0x0000) // PWM Control
+#define PWMSTA       BCM2835_REG(bcmreg_pwm, 0x0004) // PWM Status
+#define PWMDMAC      BCM2835_REG(bcmreg_pwm, 0x0008) // PWM DMA Configuration
+#define PWMRNG1      BCM2835_REG(bcmreg_pwm, 0x0010) // PWM Channel 1 Range
+#define PWMDAT1      BCM2835_REG(bcmreg_pwm, 0x0014) // PWM Channel 1 Data
+#define PWMFIF1      BCM2835_REG(bcmreg_pwm, 0x0018) // PWM FIFO Input
+#define PWMRNG2      BCM2835_REG(bcmreg_pwm, 0x0020) // PWM Channel 2 Range
+#define PWMDAT2      BCM2835_REG(bcmreg_pwm, 0x0024) // PWM Channel 2 Data
+
+//PWMCTL bits
+#define PWMMSEN2        15 // Channel 2 M/S Enable
+#define PWMUSEF2        13 // Channel 2 Use Fifo
+#define PWMPOLA2        12 // Channel 2 Polarity
+#define PWMSBIT2        11 // Channel 2 Silence Bit (Defines the state of the output when no transmission takes place)
+#define PWMRPTL2        10 // Channel 2 Repeat Last Data (1: Last data in FIFO is transmitted repetedly until FIFO is not empty)
+#define PWMMODE2        9  // Channel 2 Mode (0: PWM/ 1: Serial)
+#define PWMPWEN2        8  // Channel 2 Enable
+#define PWMMSEN1        7  // Channel 1 M/S Enable
+#define PWMCLRF1        5  // Clear Fifo
+#define PWMUSEF1        5  // Channel 1 Use Fifo
+#define PWMPOLA1        4  // Channel 1 Polarity
+#define PWMSBIT1        3  // Channel 1 Silence Bit
+#define PWMRPTL1        2  // Channel 1 Repeat Last Data
+#define PWMMODE1        1  // Channel 1 Mode
+#define PWMPWEN1        0  // Channel 1 Enable
+
+//PWMSTA bits
+#define PWMSTA4         12 // Channel 4 State
+#define PWMSTA3         11 // Channel 3 State
+#define PWMSTA2         10 // Channel 2 State
+#define PWMSTA1         9 // Channel 1 State
+#define PWMBERR         8 // Bus Error Flag
+#define PWMGAPO4        7 // Channel 4 Gap Occurred Flag
+#define PWMGAPO3        6 // Channel 3 Gap Occurred Flag
+#define PWMGAPO2        5 // Channel 2 Gap Occurred Flag
+#define PWMGAPO1        4 // Channel 1 Gap Occurred Flag
+#define PWMRERR1        3 // Fifo Read Error Flag
+#define PWMWERR1        2 // Fifo Write Error Flag
+#define PWMEMPT1        1 // Fifo Empty Flag
+#define PWMFULL1        0 // Fifo Full Flag
 
 //UART0 register offsets
 #define UART0DR        BCM2835_REG(bcmreg_uart0, 0x0000) //Data Register
@@ -250,33 +294,33 @@
 #define UART0PE        1 //Parity error
 #define UART0FE        0 //Framing error
 
-#define UART0TXFE    7 //Transmit FIFO empty
-#define UART0RXFF    6 //Receive FIFO full
-#define UART0TXFF    5 //Transmit FIFO full
-#define UART0RXFE    4 //Receive FIFO empty
-#define UART0BUSY    3 //UART busy
-#define UART0CTS    0 //Clear to send
+#define UART0TXFE       7 //Transmit FIFO empty
+#define UART0RXFF       6 //Receive FIFO full
+#define UART0TXFF       5 //Transmit FIFO full
+#define UART0RXFE       4 //Receive FIFO empty
+#define UART0BUSY       3 //UART busy
+#define UART0CTS        0 //Clear to send
 
-#define UART0SPS      7 //Stick parity select.
-#define UART0WLEN      5 //Word length (2 bits)
-#define UART0FEN      4 //Enable FIFOs
-#define UART0STP2      3 //Two stop bits select
-#define UART0EPS      2 //Even parity select.
-#define UART0PEN      1 //Parity enable
-#define UART0BRK      0 //Send break
+#define UART0SPS        7 //Stick parity select.
+#define UART0WLEN       5 //Word length (2 bits)
+#define UART0FEN        4 //Enable FIFOs
+#define UART0STP2       3 //Two stop bits select
+#define UART0EPS        2 //Even parity select.
+#define UART0PEN        1 //Parity enable
+#define UART0BRK        0 //Send break
 
 #define UART0WLEN_8BIT  0x03
 #define UART0WLEN_7BIT  0x02
 #define UART0WLEN_6BIT  0x01
 #define UART0WLEN_5BIT  0x00
 
-#define UART0CTSEN    15 //CTS hardware flow control enable
-#define UART0RTSEN    14 //RTS hardware flow control enable
-#define UART0RTS    11 //Request to send
-#define UART0RXE    9  //Receive enable
-#define UART0TXE    8  //Transmit enable
-#define UART0LBE    7  //Loopback enable
-#define UART0EN        0  //UART0 enable
+#define UART0CTSEN      15 //CTS hardware flow control enable
+#define UART0RTSEN      14 //RTS hardware flow control enable
+#define UART0RTS        11 //Request to send
+#define UART0RXE        9  //Receive enable
+#define UART0TXE        8  //Transmit enable
+#define UART0LBE        7  //Loopback enable
+#define UART0EN         0  //UART0 enable
 
 #define UART0RXIFLSEL  3 //Receive interrupt FIFO level select (3 bits)
 #define UART0TXIFLSEL  0 //Transmit interrupt FIFO level select (3 bits)
@@ -368,6 +412,8 @@
 #define SPI0DIV2F(d)    (F_CPU/d)
 #define SPI0FREQ    (SPI0CLK?SPI0DIV2F(SPI0CLK):0)
 
+//BSC0 is on pins 0 and 1 and is used for HAT I2C EEPROM
+//BSC1 is on pin 2 and pin 3 and is accessible by the Wire library
 // Defines for BSC0 and BSC1 I2C Master interfaces
 #define BSC0C       BCM2835_REG(bcmreg_bsc0, 0x0000) ///< BSC0 Master Control
 #define BSC0S       BCM2835_REG(bcmreg_bsc0, 0x0004) ///< BSC0 Master Status
@@ -388,16 +434,16 @@
 #define BSC1CLKT    BCM2835_REG(bcmreg_bsc1, 0x001c) ///< BSC0 Master Clock Stretch Timeout
 
 //BSCxC bits
-#define BSCI2CEN     15 // I2C Enable, 0 = disabled, 1 = enabled
+#define BSCI2CEN    15 // I2C Enable, 0 = disabled, 1 = enabled
 #define BSCINTR     10 // Interrupt on RX
 #define BSCINTT     9 /// Interrupt on TX
 #define BSCINTD     8 /// Interrupt on DONE
 #define BSCST       7 /// Start transfer, 1 = Start a new transfer
-#define BSCCLEAR     4 /// Clear FIFO Clear
+#define BSCCLEAR    4 /// Clear FIFO Clear
 #define BSCREAD     0 /// Read transfer
 
 //BSCxS bits
-#define BSCCLKT     9 // Clock stretch timeout
+#define BSCCLKT      9 // Clock stretch timeout
 #define BSCERR       8 // ACK error
 #define BSCRXF       7 // RXF FIFO full, 0 = FIFO is not full, 1 = FIFO is full
 #define BSCTXE       6 // TXE FIFO full, 0 = FIFO is not full, 1 = FIFO is full
@@ -405,8 +451,8 @@
 #define BSCTXD       4 // TXD FIFO can accept data
 #define BSCRXR       3 // RXR FIFO needs reading (full)
 #define BSCTXW       2 // TXW FIFO needs writing (full)
-#define BSCDONE     1 // Transfer DONE
-#define BSCTA       0 // Transfer Active
+#define BSCDONE      1 // Transfer DONE
+#define BSCTA        0 // Transfer Active
 
 //for setting and getting the BSCx clock divider
 #define BSCF2DIV(f)     (((150000000/f) + 1) & 0xFFFE)
@@ -414,65 +460,23 @@
 #define BSC0FREQ    (BSC0DIV?BSCDIV2F(BSC0DIV):0)
 #define BSC1FREQ    (BSC1DIV?BSCDIV2F(BSC1DIV):0)
 
-//PWM registers
-#define PWMCTL       BCM2835_REG(bcmreg_pwm, 0x0000) // PWM Control
-#define PWMSTA       BCM2835_REG(bcmreg_pwm, 0x0004) // PWM Status
-#define PWMDMAC      BCM2835_REG(bcmreg_pwm, 0x0008) // PWM DMA Configuration
-#define PWMRNG1      BCM2835_REG(bcmreg_pwm, 0x0010) // PWM Channel 1 Range
-#define PWMDAT1      BCM2835_REG(bcmreg_pwm, 0x0014) // PWM Channel 1 Data
-#define PWMFIF1      BCM2835_REG(bcmreg_pwm, 0x0018) // PWM FIFO Input
-#define PWMRNG2      BCM2835_REG(bcmreg_pwm, 0x0020) // PWM Channel 2 Range
-#define PWMDAT2      BCM2835_REG(bcmreg_pwm, 0x0024) // PWM Channel 2 Data
-
-//PWMCTL bits
-#define PWMMSEN2        15 // Channel 2 M/S Enable
-#define PWMUSEF2        13 // Channel 2 Use Fifo
-#define PWMPOLA2        12 // Channel 2 Polarity
-#define PWMSBIT2        11 // Channel 2 Silence Bit (Defines the state of the output when no transmission takes place)
-#define PWMRPTL2        10 // Channel 2 Repeat Last Data (1: Last data in FIFO is transmitted repetedly until FIFO is not empty)
-#define PWMMODE2        9 // Channel 2 Mode (0: PWM/ 1: Serial)
-#define PWMPWEN2        8 // Channel 2 Enable
-#define PWMMSEN1        7 // Channel 1 M/S Enable
-#define PWMCLRF1        5 // Clear Fifo
-#define PWMUSEF1        5 // Channel 1 Use Fifo
-#define PWMPOLA1        4 // Channel 1 Polarity
-#define PWMSBIT1        3 // Channel 1 Silence Bit
-#define PWMRPTL1        2 // Channel 1 Repeat Last Data
-#define PWMMODE1        1 // Channel 1 Mode
-#define PWMPWEN1        0 // Channel 1 Enable
-
-//PWMSTA bits
-#define PWMSTA4         12 // Channel 4 State
-#define PWMSTA3         11 // Channel 3 State
-#define PWMSTA2         10 // Channel 2 State
-#define PWMSTA1         9 // Channel 1 State
-#define PWMBERR         8 // Bus Error Flag
-#define PWMGAPO4        7 // Channel 4 Gap Occurred Flag
-#define PWMGAPO3        6 // Channel 3 Gap Occurred Flag
-#define PWMGAPO2        5 // Channel 2 Gap Occurred Flag
-#define PWMGAPO1        4 // Channel 1 Gap Occurred Flag
-#define PWMRERR1        3 // Fifo Read Error Flag
-#define PWMWERR1        2 // Fifo Write Error Flag
-#define PWMEMPT1        1 // Fifo Empty Flag
-#define PWMFULL1        0 // Fifo Full Flag
-
 //BSCS Registers
-#define BSCSDR        BCM2835_REG(bcmreg_bscs, 0x0000) ///< Data Register holds (FR << 16) | (RSR << 8) | DATA
-#define BSCSRSR          BCM2835_REG(bcmreg_bscs, 0x0004) ///< The operation status register and error clear register
-#define BSCSSLV          BCM2835_REG(bcmreg_bscs, 0x0008) ///< The I2C SPI Address Register holds the I2C slave address value (7 bit)
-#define BSCSCR        BCM2835_REG(bcmreg_bscs, 0x000C) ///< The Control register is used to configure the I2C or SPI operation
-#define BSCSFR        BCM2835_REG(bcmreg_bscs, 0x0010) ///< Flag register
-#define BSCSIFLS      BCM2835_REG(bcmreg_bscs, 0x0014) ///< Interrupt fifo level select register
-#define BSCSIMSC      BCM2835_REG(bcmreg_bscs, 0x0018) ///< Interupt Mask Set Clear Register
-#define BSCSRIS          BCM2835_REG(bcmreg_bscs, 0x001C) ///< Raw Interupt Status Register
-#define BSCSMIS          BCM2835_REG(bcmreg_bscs, 0x0020) ///< Masked Interupt Status Register
-#define BSCSICR          BCM2835_REG(bcmreg_bscs, 0x0024) ///< Interupt Clear Register
-#define BSCSDMACR      BCM2835_REG(bcmreg_bscs, 0x0028) ///< DMA Control Register
-#define BSCSTDR          BCM2835_REG(bcmreg_bscs, 0x002C) ///< FIFO Test Data
-#define BSCSGPUSTAT      BCM2835_REG(bcmreg_bscs, 0x0030) ///< GPU Status Register
-#define BSCSHCTRL      BCM2835_REG(bcmreg_bscs, 0x0034) ///< Host Control Register
-#define BSCSDEBUG1       BCM2835_REG(bcmreg_bscs, 0x0038) ///< I2C Debug Register
-#define BSCSDEBUG2      BCM2835_REG(bcmreg_bscs, 0x003C) ///< SPI Debug Register
+#define BSCSDR            BCM2835_REG(bcmreg_bscs, 0x0000) ///< Data Register holds (FR << 16) | (RSR << 8) | DATA
+#define BSCSRSR           BCM2835_REG(bcmreg_bscs, 0x0004) ///< The operation status register and error clear register
+#define BSCSSLV           BCM2835_REG(bcmreg_bscs, 0x0008) ///< The I2C SPI Address Register holds the I2C slave address value (7 bit)
+#define BSCSCR            BCM2835_REG(bcmreg_bscs, 0x000C) ///< The Control register is used to configure the I2C or SPI operation
+#define BSCSFR            BCM2835_REG(bcmreg_bscs, 0x0010) ///< Flag register
+#define BSCSIFLS          BCM2835_REG(bcmreg_bscs, 0x0014) ///< Interrupt fifo level select register
+#define BSCSIMSC          BCM2835_REG(bcmreg_bscs, 0x0018) ///< Interupt Mask Set Clear Register
+#define BSCSRIS           BCM2835_REG(bcmreg_bscs, 0x001C) ///< Raw Interupt Status Register
+#define BSCSMIS           BCM2835_REG(bcmreg_bscs, 0x0020) ///< Masked Interupt Status Register
+#define BSCSICR           BCM2835_REG(bcmreg_bscs, 0x0024) ///< Interupt Clear Register
+#define BSCSDMACR         BCM2835_REG(bcmreg_bscs, 0x0028) ///< DMA Control Register
+#define BSCSTDR           BCM2835_REG(bcmreg_bscs, 0x002C) ///< FIFO Test Data
+#define BSCSGPUSTAT       BCM2835_REG(bcmreg_bscs, 0x0030) ///< GPU Status Register
+#define BSCSHCTRL         BCM2835_REG(bcmreg_bscs, 0x0034) ///< Host Control Register
+#define BSCSDEBUG1        BCM2835_REG(bcmreg_bscs, 0x0038) ///< I2C Debug Register
+#define BSCSDEBUG2        BCM2835_REG(bcmreg_bscs, 0x003C) ///< SPI Debug Register
 
 //BSCSRSR bits
 #define BSCSOE          0 // RX FIFO is full and a new data character is received
