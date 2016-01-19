@@ -53,22 +53,22 @@ DHT22_ERROR_t DHT22::readData(){
   WAITTO(LOW, DHT_BUS_HUNG, 250);
   DIRECT_MODE_OUTPUT(bitmask);
   DIRECT_WRITE_LOW(bitmask);
-  delay(1); // 1.1 ms
+  usleep(1200); // 1.1 ms
   DIRECT_MODE_INPUT(bitmask);
   // Find the start of the ACK Pulse
   WAITTO(LOW, DHT_ERROR_NOT_PRESENT, 40);  //20-40 spec
   // Find the end of the ACK Pulse
-  WAITTO(HIGH, DHT_ERROR_ACK_TOO_LONG, 60);//20-40 spec
+  WAITTO(HIGH, DHT_ERROR_ACK_TOO_LONG1, 60);//20-40 spec
   // Find the start of the Sync Pulse
-  WAITTO(LOW, DHT_ERROR_ACK_TOO_LONG, 100);//80 spec
+  WAITTO(LOW, DHT_ERROR_ACK_TOO_LONG2, 100);//80 spec
   // Find the end of the Sync Pulse
-  WAITTO(HIGH, DHT_ERROR_ACK_TOO_LONG, 100);//80 spec
+  WAITTO(HIGH, DHT_ERROR_ACK_TOO_LONG3, 100);//80 spec
   // Read the 40 bit data stream
   for(i = 0; i < DHT22_DATA_BIT_COUNT; i++){
     // Find the start of the data pulse
-    WAITTO(LOW, DHT_ERROR_SYNC_TIMEOUT, 150);//50 spec
+    WAITTO(LOW, DHT_ERROR_SYNC_TIMEOUT, 200);//50 spec
     // Measure the width of the data pulse
-    WAITTO(HIGH, DHT_ERROR_DATA_TIMEOUT, 250);//30-70 spec
+    WAITTO(HIGH, DHT_ERROR_DATA_TIMEOUT, 300);//30-70 spec
     bitTimes[i] = micros() - startWait;
   }
 

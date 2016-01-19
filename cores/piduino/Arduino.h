@@ -103,26 +103,62 @@ void yield(void);
 #define _NOP() do {} while (0)
 #endif
 
-typedef unsigned int word;
-
 #define bit(b) (1UL << (b))
-
-typedef uint8_t boolean;
-typedef uint8_t byte;
 
 #define micros() (unsigned long)(STCV)
 #define millis() (unsigned long)(STCV / 1000)
+
+typedef unsigned int word;
+typedef uint8_t boolean;
+typedef uint8_t byte;
+
+//under millisecond delayMicroseconds halts the CPU
 void delayMicroseconds(uint32_t m);
 void delay(uint32_t m);
 void sleepMicroseconds(uint32_t m);
 
+void pinMode(uint8_t, uint8_t);
+void digitalWrite(uint8_t, uint8_t);//47.5ns direct register write takes 23ns
+int digitalRead(uint8_t);//110ns direct register read takes 74ns
+
+//those return nothing and are here for compatibility
+//ToDo: make them rewritable
+int analogRead(uint8_t pin);
+void analogReference(uint8_t mode);
+
+//DIV = 19200000 / (FREQ * RANGE)
+uint32_t analogWriteSetup(uint32_t freq, uint32_t range);//returns the frequency achieved
+void analogWrite(uint8_t, uint16_t);//500ns direct register write takes 23ns rest is pin mode and channel enable
+
+unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout);
+
+void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val);
+uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder);
+
+//Interrupt check is called every 200us or so
+typedef void (*voidFuncPtr)(void);
+void attachInterrupt(uint8_t, voidFuncPtr, int mode);
+void detachInterrupt(uint8_t);
+
+void setup(void);
+void loop(void);
+
 int init(void);
 void uninit(void);
 
-typedef void *(*thread_fn)(void *);
+//Pi Specific
+//I2C0 ID_SC/ID_SD
+void ids_begin(void);
+void ids_end(void);
+void ids_set_freq(uint32_t frequency);
+uint8_t ids_write(uint8_t address, uint8_t * buf, uint32_t len);
+uint8_t ids_read(uint8_t address, uint8_t* buf, uint32_t len);
 
+//Call this and the sketch will quit once the loop has returned
 void request_sketch_terminate();
 
+//Threads
+typedef void *(*thread_fn)(void *);
 void      thread_yield();
 pthread_t thread_self();
 pthread_t thread_create(thread_fn fn, void * arg);
@@ -134,33 +170,9 @@ uint8_t   thread_running(pthread_t t);
 uint8_t   thread_equals(pthread_t t);
 void      thread_lock(int index);
 void      thread_unlock(int index);
-#define yield() thread_yield()
+#define   yield() thread_yield()
 
-void pinMode(uint8_t, uint8_t);
-void digitalWrite(uint8_t, uint8_t);//47.5ns direct register write takes 23ns
-int digitalRead(uint8_t);//110ns direct register read takes 74ns
-
-int analogRead(uint8_t pin);
-void analogReference(uint8_t mode);
-
-//DIV = 19200000 / (FREQ * RANGE)
-void analogWriteInit();
-uint32_t analogWriteSetup(uint32_t freq, uint32_t range);//returns the freq acheaved
-void analogWrite(uint8_t, uint16_t);//500ns direct register write takes 23ns rest is pin mode and channel enable
-
-unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout);
-
-void shiftOut(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val);
-uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder);
-
-typedef void (*voidFuncPtr)(void);
-
-void attachInterrupt(uint8_t, void (*)(void), int mode);
-void detachInterrupt(uint8_t);
-
-void setup(void);
-void loop(void);
-
+//ToDo: move this to separate(private) header to be included only where necessary
 void uart_check_fifos();
 
 #ifdef __cplusplus

@@ -23,6 +23,7 @@
 static uint32_t _pwm_range = PWM_RANGE;
 static uint32_t _pwm_wanted_freq = 1;
 static uint32_t _pwm_real_freq = 1;
+static uint8_t _pwm_has_started = 0;
 
 void analogWriteRange(uint32_t range){
   _pwm_range = range;
@@ -49,18 +50,23 @@ uint32_t analogWriteSetup(uint32_t frequency, uint32_t range){
 }
 
 void analogWriteInit(){
-  _pwm_wanted_freq = analogWriteSetup(1000, 256);
-  PWMCTL = 0;
+  if(!_pwm_has_started){
+    _pwm_has_started = 1;
+    _pwm_wanted_freq = analogWriteSetup(1000, 256);
+    PWMCTL = 0;
+  }
 }
 
 void analogWrite(uint8_t p, uint16_t v){
   v = ((v*_pwm_real_freq)/_pwm_wanted_freq) % _pwm_range;
-  if(p == 18 || p == 19){
-    pinMode(p, GPF5);
-  } else if(p == 12 || p == 13 || p == 40 || p == 41 || p == 45){
-    pinMode(p, GPF0);
-  }
   if(v){
+    if(!_pwm_has_started)
+      analogWriteInit();
+    if(p == 18 || p == 19){
+      pinMode(p, GPF5);
+    } else if(p == 12 || p == 13 || p == 40 || p == 41 || p == 45){
+      pinMode(p, GPF0);
+    }
     if(p == 12 || p == 18 || p == 40){
       PWMCTL |= _BV(PWMPWEN1) | (1 << PWMMSEN1);
       PWMDAT1 = v;
@@ -75,6 +81,11 @@ void analogWrite(uint8_t p, uint16_t v){
     } else if(p == 13 || p == 19 || p == 41 || p == 45){
       PWMCTL &= ~(_BV(PWMPWEN2) | (1 << PWMMSEN2));
       PWMDAT2 = v;
+    }
+    if(p == 18 || p == 19){
+      pinMode(p, INPUT);
+    } else if(p == 12 || p == 13 || p == 40 || p == 41 || p == 45){
+      pinMode(p, INPUT);
     }
   }
 }

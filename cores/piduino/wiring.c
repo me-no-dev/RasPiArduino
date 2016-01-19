@@ -224,6 +224,5 @@ int init(){
   _board_revision = revision;
   init_pins();
   srand(time(NULL));
-  analogWriteInit();
   return 0;
 }

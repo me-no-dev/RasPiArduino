@@ -80,6 +80,7 @@ int main(int argc, char **argv){
     pthread_setname_np(_loop_thread, "arduino-loop");
     pthread_detach(_loop_thread);
   }
+  usleep(1000);
   while(_loop_is_running){
     console_run();
     uart_check_fifos();

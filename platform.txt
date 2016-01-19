@@ -2,8 +2,8 @@ name=RaspberryPi
 version=0.0.1
 
 # Toolchain Location
-runtime.tools.toolchain.path={runtime.platform.path}/tools/arm-none-linux-gnueabi
-runtime.tools.toolchain.prefix=arm-none-linux-gnueabi-
+runtime.tools.toolchain.path={runtime.platform.path}/tools/arm-linux-gnueabihf
+runtime.tools.toolchain.prefix=arm-linux-gnueabihf-
 
 compiler.path={runtime.tools.toolchain.path}/bin/
 compiler.c.cmd={runtime.tools.toolchain.prefix}gcc
