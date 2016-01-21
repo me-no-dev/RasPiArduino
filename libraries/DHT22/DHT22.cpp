@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <pins_arduino.h>
 
-#define DIRECT_READ(pin)		((GPLEV0 & (1 << pin)) ? 1 : 0)
+#define DIRECT_READ(pin)		((GPLEV0 & (1 << pin)) > 0)
 #define DIRECT_MODE_INPUT(pin)	(GPFSEL(pin) &= ~(0x07 << GPFSELB(pin)))
 #define DIRECT_MODE_OUTPUT(pin)	(GPFSEL(pin) |= (1 << GPFSELB(pin)))
 #define DIRECT_WRITE_LOW(pin)	(GPCLR0 = (1 << pin))
@@ -31,7 +31,7 @@ DHT22_ERROR_t DHT22::readData(){
   int i;
 
   uint32_t startWait;
-#define WAITTO(level, error, timeout) startWait = micros(); while(DIRECT_READ(bitmask) == level) { if((micros() - startWait) >= timeout) return error; }
+#define WAITTO(level, error, timeout) do { startWait = STCLO; do { if((STCLO - startWait) >= timeout){ return error; } } while(DIRECT_READ(bitmask) == level); } while(0)
 
   currentHumidity = 0;
   currentTemperature = 0;
@@ -49,29 +49,38 @@ DHT22_ERROR_t DHT22::readData(){
   // Pin needs to start HIGH, wait until it is HIGH with a timeout
   //__/    Reset    /_SYN __/0 _/1 __/....
   //  |_____________| |__|  |_| |_|  |_.....
+  //pinMode(27, OUTPUT); // << DEBUG
+  //GPCLR0 = _BV(27); // << DEBUG
   pinMode(bitmask, INPUT);//use this first to reset any previous PullUp/Downs
   WAITTO(LOW, DHT_BUS_HUNG, 250);
   DIRECT_MODE_OUTPUT(bitmask);
+  //GPSET0 = _BV(27); // << DEBUG
   DIRECT_WRITE_LOW(bitmask);
   usleep(1200); // 1.1 ms
   DIRECT_MODE_INPUT(bitmask);
+  //GPCLR0 = _BV(27); // << DEBUG
   // Find the start of the ACK Pulse
   WAITTO(LOW, DHT_ERROR_NOT_PRESENT, 40);  //20-40 spec
+  //GPSET0 = _BV(27); // << DEBUG
   // Find the end of the ACK Pulse
   WAITTO(HIGH, DHT_ERROR_ACK_TOO_LONG1, 60);//20-40 spec
+  //GPCLR0 = _BV(27); // << DEBUG
   // Find the start of the Sync Pulse
   WAITTO(LOW, DHT_ERROR_ACK_TOO_LONG2, 100);//80 spec
+  //GPSET0 = _BV(27); // << DEBUG
   // Find the end of the Sync Pulse
   WAITTO(HIGH, DHT_ERROR_ACK_TOO_LONG3, 100);//80 spec
+  //GPCLR0 = _BV(27); // << DEBUG
   // Read the 40 bit data stream
   for(i = 0; i < DHT22_DATA_BIT_COUNT; i++){
     // Find the start of the data pulse
-    WAITTO(LOW, DHT_ERROR_SYNC_TIMEOUT, 200);//50 spec
+    WAITTO(LOW, DHT_ERROR_SYNC_TIMEOUT, 150);//50 spec
+    //GPSET0 = _BV(27); // << DEBUG
     // Measure the width of the data pulse
-    WAITTO(HIGH, DHT_ERROR_DATA_TIMEOUT, 300);//30-70 spec
+    WAITTO(HIGH, DHT_ERROR_DATA_TIMEOUT, 150);//30-70 spec
     bitTimes[i] = micros() - startWait;
+    //GPCLR0 = _BV(27); // << DEBUG
   }
-
   // Now bitTimes have the number of retries (us)
   // that were needed to find the end of each data bit
   // Spec: 0 is 26 to 28 us

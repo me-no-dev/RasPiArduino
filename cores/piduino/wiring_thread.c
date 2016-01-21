@@ -46,11 +46,11 @@ int thread_set_name(pthread_t t, const char *name){
 int thread_set_priority(const int pri){
   struct sched_param sched ;
   memset (&sched, 0, sizeof(sched)) ;
-  if (pri > sched_get_priority_max(SCHED_RR))
-    sched.sched_priority = sched_get_priority_max(SCHED_RR);
+  if (pri > sched_get_priority_max(SCHED_OTHER))
+    sched.sched_priority = sched_get_priority_max(SCHED_OTHER);
   else
     sched.sched_priority = pri ;
-  return sched_setscheduler(0, SCHED_RR, &sched) ;
+  return sched_setscheduler(0, SCHED_OTHER, &sched) ;
 }
 
 int thread_detach(pthread_t t){

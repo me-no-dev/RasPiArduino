@@ -72,11 +72,23 @@ __attribute__((constructor(101))) void startInit() {
 }
 
 int main(int argc, char **argv){
+  thread_set_priority(65);
   _keep_sketch_running = 1;
   _loop_is_running = 0;
   console_attach_signal_handlers();
   idemonitor_begin();
-  if(pthread_create(&_loop_thread, NULL, _loop_thread_task, NULL) == 0){
+
+  pthread_attr_t attr;
+  pthread_attr_t *attrp;      /* NULL or &attr */
+  if(pthread_attr_init(&attr) == 0){
+    attrp = &attr;
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    //pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+  }
+  if(pthread_create(&_loop_thread, attrp, _loop_thread_task, NULL) == 0){
+    if (attrp != NULL) pthread_attr_destroy(attrp);
     pthread_setname_np(_loop_thread, "arduino-loop");
     pthread_detach(_loop_thread);
   }
