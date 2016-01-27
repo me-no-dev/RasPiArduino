@@ -1,4 +1,6 @@
 # RasPiArduino
+
+[![Join the chat at https://gitter.im/me-no-dev/RasPiArduino](https://badges.gitter.im/me-no-dev/RasPiArduino.svg)](https://gitter.im/me-no-dev/RasPiArduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Arduino Framework for RaspberryPI
 
 
