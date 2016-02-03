@@ -123,5 +123,17 @@ git clone https://github.com/me-no-dev/RasPiArduino piduino
 * Select the RespberryPi from the list of Ports (will show the IP address)
 * Upload your sketch and see it go
 
+
+### If everything went well
+#### Selecting the board from the list of ports
+![Select Pi Port](doc/pi_select.png)
+
+#### Password prompt berfore upload
+![Enter Pi Pass](doc/pi_pass.png)
+
+#### Monitoring the sketch
+![Sketch Monitor](doc/pi_monitor.png)
+
+
 ### Links to external tutorials
 * [VIDEO: Setup Arduino IDE for Windows](https://www.youtube.com/watch?v=lZvhtfUlY8Y)
