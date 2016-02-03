@@ -4,6 +4,29 @@
 Arduino Framework for RaspberryPI
 
 
+### Instructions for Arduino IDE
+* Open the hardware folder of Arduino IDE
+* Create a folder named "RaspberryPi"
+* Clone the repository to a folder named "piduino"
+```bash
+mkdir hardware/RaspberryPi
+cd RaspberryPi
+git clone https://github.com/me-no-dev/RasPiArduino piduino
+```
+* Download , extract and copy the toolchain to piduino/tools/arm-linux-gnueabihf
+  - Windows: [gnutoolchains.com](http://gnutoolchains.com/raspberry/)
+    * The toolchain for Jessie will work ONLY on RaspberryPi 2
+    * The toolchain for Wheezy will work on ALL RaspberryPi boards (recommended)
+    * [Video Instructions](https://www.youtube.com/watch?v=lZvhtfUlY8Y)
+  - Linux 64: [arm-linux-gnueabihf](https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux64.tar.gz)
+  - Linux 32: [arm-linux-gnueabihf](https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux32.tar.gz)
+  - Mac OS X: [arm-linux-gnueabihf](https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-osx.tar.gz)
+* Restart Arduino IDE and select the RaspberryPI from the list of boards
+* Compile a sketch
+* Select the RespberryPi from the list of Ports (will show the IP address)
+* Upload your sketch and see it go
+
+
 ### Instructions for the PI
 * Install Raspbian Jessie on your RaspberryPI
 * Disable Serial Console on boot by changing /boot/cmdline.txt to
@@ -23,12 +46,12 @@ EOL
 sudo su
 passwd
 ```
-_enter the new root password twice_
+- _enter the new root password twice_
 ```bash
 exit
 sudo nano /etc/ssh/sshd_config
 ```
-_change PermitRootLogin to yes_
+- change _PermitRootLogin_ to _yes_
 
 * Change the hostane for your Pi (optional)
 ```bash
@@ -108,20 +131,6 @@ sudo echo "options r8188eu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc
 ```
 
 * Do not load i2c uart or spi kernel drivers
-
-### Instructions for Arduino IDE
-* Open the hardware folder of Arduino IDE
-* Create a folder named "RaspberryPi"
-* Clone the repository to a folder named "piduino"
-```bash
-cd RaspberryPi
-git clone https://github.com/me-no-dev/RasPiArduino piduino
-```
-* Copy the toolchain to tools/arm-linux-gnueabihf (WIP)
-* Restart Arduino IDE and select the RaspberryPI from the list of boards
-* Compile a sketch
-* Select the RespberryPi from the list of Ports (will show the IP address)
-* Upload your sketch and see it go
 
 
 ### If everything went well
