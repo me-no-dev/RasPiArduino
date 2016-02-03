@@ -35,6 +35,22 @@ git clone https://github.com/me-no-dev/RasPiArduino piduino
 
 ### Instructions for the PI
 * Install Raspbian Jessie on your RaspberryPI
+* Gain root permissions
+```bash
+sudo su
+```
+
+* Enable password login for root
+```bash
+passwd
+```
+- _enter the new root password twice_
+```bash
+exit
+nano /etc/ssh/sshd_config
+```
+- change _PermitRootLogin_ to _yes_
+
 * Disable Serial Console on boot by changing /boot/cmdline.txt to
 ```bash
 cat > /boot/cmdline.txt <<EOL
@@ -47,26 +63,14 @@ EOL
 #dtparam=audio=on
 ```
 
-* Enable password login for root
-```bash
-sudo su
-passwd
-```
-- _enter the new root password twice_
-```bash
-exit
-sudo nano /etc/ssh/sshd_config
-```
-- change _PermitRootLogin_ to _yes_
-
 * Change the hostname for your Pi (optional)
 ```bash
-sudo echo "piduino" > /etc/hostname
+echo "piduino" > /etc/hostname
 ```
 
 * Setup WiFi (optional)
 ```bash
-sudo cat > /etc/wpa_supplicant/wpa_supplicant.conf <<EOL
+cat > /etc/wpa_supplicant/wpa_supplicant.conf <<EOL
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 network={
@@ -78,7 +82,7 @@ EOL
 
 * Setup avahi service to allow updating the sketch from ArduinoIDE
 ```bash
-sudo cat > /etc/avahi/services/arduino.service <<EOL
+cat > /etc/avahi/services/arduino.service <<EOL
 <?xml version="1.0" standalone='no'?><!--*-nxml-*-->
 <!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 <service-group>
@@ -91,30 +95,30 @@ sudo cat > /etc/avahi/services/arduino.service <<EOL
 </service-group>
 EOL
 
-sudo service avahi-daemon restart
+service avahi-daemon restart
 ```
 
 * Install telnet and git
 ```bash
-sudo apt-get install telnet git
+apt-get install telnet git
 ```
 
 * Copy all files from tools/arpi_bins to /usr/local/bin
 ```bash
 git clone https://github.com/me-no-dev/RasPiArduino.git piduino
 chmod +x piduino/tools/arpi_bins/*
-sudo cp piduino/tools/arpi_bins/* /usr/local/bin
+cp piduino/tools/arpi_bins/* /usr/local/bin
 rm -rf piduino
 ```
 
 * Create symbolic link for _run-avrdude_
 ```bash
-sudo ln -s /usr/local/bin/run-avrdude /usr/bin/run-avrdude
+ln -s /usr/local/bin/run-avrdude /usr/bin/run-avrdude
 ```
 
 * Synchronize time and start sketch on boot (optional)
 ```bash
-sudo cat > /etc/rc.local <<EOL
+cat > /etc/rc.local <<EOL
 #!/bin/sh -e
 
 _IP=$(hostname -I) || true
@@ -132,8 +136,8 @@ EOL
 
 * Prevent some RealTek USB WiFi from sleep (optional) (EU)
 ```bash
-sudo echo "options 8192cu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/8192cu.conf
-sudo echo "options r8188eu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/r8188eu.conf
+echo "options 8192cu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/8192cu.conf
+echo "options r8188eu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/r8188eu.conf
 ```
 
 * Do not load I2C UART or SPI kernel drivers
