@@ -15,6 +15,7 @@ done
 
 killall $BINNAME > /dev/null 2>&1
 mv $SKETCH $DESTBIN
+cd /
 $DESTBIN >> $LOGFILE 2>&1 &
 
 echo "Sketch Started"

@@ -22,4 +22,4 @@ if [ $RUNNING -gt 0 ]; then
   sleep 1
 fi
 
-real_telnet $@
+real_telnet $@ #2>> /run/sketch.log

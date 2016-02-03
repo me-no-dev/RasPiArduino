@@ -11,7 +11,8 @@ if [ -f "$DESTBIN" ]; then
   done
   
   killall arduino-sketch > /dev/null 2>&1
-  $DESTBIN 2>&1 >> /run/sketch.log &
+  cd /
+  $DESTBIN >> /run/sketch.log 2>&1 &
 else
   exit 1;
 fi
