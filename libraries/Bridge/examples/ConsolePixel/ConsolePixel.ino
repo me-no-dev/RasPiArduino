@@ -27,6 +27,7 @@
 
  */
 
+#include <Bridge.h>
 #include <Console.h>
 
 const int ledPin = 13; // the pin that the LED is attached to

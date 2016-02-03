@@ -23,6 +23,7 @@
 
  */
 
+#include <Bridge.h>
 #include <Console.h>
 
 void setup() {

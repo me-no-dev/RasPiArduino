@@ -63,8 +63,8 @@ static const uint8_t PWM11 = 19;//pin 35 //B+   //PCM_FS
 //static const uint8_t D30 = 30;//pin  //A/B    //PCM_DIN
 //static const uint8_t D31 = 31;//pin  //A/B    //PCM_DOUT
 
-
-#define SERIAL_PORT_MONITOR   Console
-#define SERIAL_PORT_HARDWARE  Serial
+#define SERIAL_PORT_USBVIRTUAL  Console
+#define SERIAL_PORT_MONITOR     Console
+#define SERIAL_PORT_HARDWARE    Serial
 
 #endif

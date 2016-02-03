@@ -21,6 +21,7 @@
 
  */
 
+#include <Bridge.h>
 #include <Console.h>
 
 String name;
