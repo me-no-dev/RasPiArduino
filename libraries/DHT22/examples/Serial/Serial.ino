@@ -9,14 +9,14 @@
 // Setup a DHT22 instance
 DHT22 myDHT22(DHT22_PIN);
 
-void setup(void)
+void setup()
 {
   // start serial port
   Serial.begin(9600);
   Serial.println("DHT22 Library Demo");
 }
 
-void loop(void)
+void loop()
 { 
   DHT22_ERROR_t errorCode;
   
