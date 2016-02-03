@@ -14,16 +14,16 @@ script:
   - which arduino
   - mkdir RaspberryPi
   - cd RaspberryPi
-  - ln -s $TRAVIS_BUILD_DIR PiDuino
-  - cd PiDuino/tools
+  - ln -s $TRAVIS_BUILD_DIR piduino
+  - cd piduino/tools
   - wget https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux64.tar.gz
   - tar zxvf arm-linux-gnueabihf-linux64.tar.gz
   - chmod +x arm-linux-gnueabihf/bin/*
   - chmod +x arm-linux-gnueabihf/arm-linux-gnueabihf/bin/*
-  - source $TRAVIS_BUILD_DIR/travis/common.sh
-  - arduino --board RaspberryPi:PiDuino:bplus --save-prefs
+  - arduino --board RaspberryPi:piduino:bplus --save-prefs
   - arduino --get-pref sketchbook.path
-  - build_sketches arduino $HOME/Arduino/libraries/ESPAsyncTCP PiDuino
+  - source $TRAVIS_BUILD_DIR/travis/common.sh
+  - build_sketches arduino $TRAVIS_BUILD_DIR piduino
 
 notifications:
   email:
