@@ -5,12 +5,11 @@ Arduino Framework for RaspberryPI
 
 
 ### Instructions for Arduino IDE
-* Open the hardware folder of Arduino IDE
-* Create a folder named "RaspberryPi"
-* Clone the repository to a folder named "piduino"
+* Open the installation folder of Arduino IDE
+* Create a folder named "RaspberryPi" inside "hardware" and clone the repository to a folder named "piduino"
 ```bash
 mkdir hardware/RaspberryPi
-cd RaspberryPi
+cd hardware/RaspberryPi
 git clone https://github.com/me-no-dev/RasPiArduino piduino
 ```
 * Download , extract and copy the toolchain to piduino/tools/arm-linux-gnueabihf
@@ -53,7 +52,7 @@ sudo nano /etc/ssh/sshd_config
 ```
 - change _PermitRootLogin_ to _yes_
 
-* Change the hostane for your Pi (optional)
+* Change the hostname for your Pi (optional)
 ```bash
 sudo echo "piduino" > /etc/hostname
 ```
@@ -88,7 +87,7 @@ EOL
 sudo service avahi-daemon restart
 ```
 
-* Install telent and git
+* Install telnet and git
 ```bash
 sudo apt-get install telnet git
 ```
@@ -130,7 +129,7 @@ sudo echo "options 8192cu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/
 sudo echo "options r8188eu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/r8188eu.conf
 ```
 
-* Do not load i2c uart or spi kernel drivers
+* Do not load I2C UART or SPI kernel drivers
 
 
 ### If everything went well
