@@ -212,7 +212,7 @@ int init(){
   uint32_t offset = ((revision == 0xa01041 || revision == 0xa21041)?0x1F000000:0);
   if(revision == 0xa01041)
     revision = 0x10;//pi2 has B+ pinout
-  else if(revision == 0xa21041)
+  else if(revision == 0xa21041 || revision == 0x00900092)
     revision = 0x13;//pi2 has B+ pinout
   if(revision >= PINMASKS_LEN || !rpi_model_pinmasks[revision]){
     fprintf(stderr, "UNKNOWN_REVISION: 0x%08X\n", revision);
