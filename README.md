@@ -5,27 +5,109 @@ Arduino Framework for RaspberryPI
 
 
 ### Instructions for the PI
-* Install Raspbian on your RaspberryPI
+* Install Raspbian Jessie on your RaspberryPI
 * Disable Serial Console on boot by changing /boot/cmdline.txt to
-```
+```bash
+cat > /boot/cmdline.txt <<EOL
 dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
+EOL
 ```
 
 * Disable loading sound kernel module by commenting _dtparam=audio=on_ in /boot/config.txt
+```
+#dtparam=audio=on
+```
+
 * Enable password login for root
 ```bash
 sudo su
 passwd
-_enter the new root password twice_
-nano /etc/ssh/sshd_config
-_change PermitRootLogin to yes_
 ```
-* Copy tools/arduino.service to /etc/avahi/services/arduino.service and restart avahi-daemon
+_enter the new root password twice_
+```bash
+exit
+sudo nano /etc/ssh/sshd_config
+```
+_change PermitRootLogin to yes_
+
+* Change the hostane for your Pi (optional)
+```bash
+sudo echo "piduino" > /etc/hostname
+```
+
+* Setup WiFi (optional)
+```bash
+sudo cat > /etc/wpa_supplicant/wpa_supplicant.conf <<EOL
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+network={
+    ssid="your-ssid"
+    psk="your-pass"
+}
+EOL
+```
+
+* Setup avahi service to allow updating the sketch from ArduinoIDE
+```bash
+sudo cat > /etc/avahi/services/arduino.service <<EOL
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">%h</name>
+  <service>
+    <type>_arduino._tcp</type>
+    <port>22</port>
+    <txt-record>board=bplus</txt-record>
+  </service>
+</service-group>
+EOL
+
+sudo service avahi-daemon restart
+```
+
+* Install telent and git
+```bash
+sudo apt-get install telnet git
+```
+
 * Copy all files from tools/arpi_bins to /usr/local/bin
-* Install telent by running _sudo apt-get install telnet_
-* Create symbolic link for _run-avrdude_ by running _sudo ln -s /usr/local/bin/run-avrdude /usr/bin/run-avrdude_
+```bash
+git clone https://github.com/me-no-dev/RasPiArduino.git piduino
+chmod +x piduino/tools/arpi_bins/*
+sudo cp piduino/tools/arpi_bins/* /usr/local/bin
+rm -rf piduino
+```
+
+* Create symbolic link for _run-avrdude_
+```bash
+sudo ln -s /usr/local/bin/run-avrdude /usr/bin/run-avrdude
+```
+
+* Synchronize time and start sketch on boot (optional)
+```bash
+sudo cat > /etc/rc.local <<EOL
+#!/bin/sh -e
+
+_IP=$(hostname -I) || true
+if [ "$_IP" ]; then
+  printf "My IP address is %s\n" "$_IP"
+fi
+
+# Sync Time
+ntpdate-debian -u
+# Start Sketch
+/usr/local/bin/run-sketch
+exit 0
+EOL
+```
+
+* Prevent some RealTek USB WiFi from sleep (optional) (EU)
+```bash
+sudo echo "options 8192cu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/8192cu.conf
+sudo echo "options r8188eu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/r8188eu.conf
+```
+
 * Do not load i2c uart or spi kernel drivers
-* Optionally add _/usr/local/bin/run-sketch_ to /etc/rc.local to start the sketch on boot
 
 ### Instructions for Arduino IDE
 * Open the hardware folder of Arduino IDE
@@ -35,6 +117,11 @@ _change PermitRootLogin to yes_
 cd RaspberryPi
 git clone https://github.com/me-no-dev/RasPiArduino piduino
 ```
-* Copy the toolchain to tools/arm-none-linux-gnueabi (WIP)
-* Restart Arduino IDE and select the PI from the list of network boards
+* Copy the toolchain to tools/arm-linux-gnueabihf (WIP)
+* Restart Arduino IDE and select the RaspberryPI from the list of boards
+* Compile a sketch
+* Select the RespberryPi from the list of Ports (will show the IP address)
+* Upload your sketch and see it go
 
+### Links to external tutorials
+* [VIDEO: Setup Arduino IDE for Windows](https://www.youtube.com/watch?v=lZvhtfUlY8Y)
