@@ -12,6 +12,7 @@ script:
   - mv arduino-1.6.5 $HOME/arduino_ide
   - export PATH="$HOME/arduino_ide:$PATH"
   - which arduino
+  - cd $HOME/arduino_ide/hardware
   - mkdir RaspberryPi
   - cd RaspberryPi
   - ln -s $TRAVIS_BUILD_DIR piduino
