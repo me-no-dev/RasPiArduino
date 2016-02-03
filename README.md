@@ -64,7 +64,7 @@ EOL
 
 * Change the hostname for your Pi (optional)
 ```bash
-echo "piduino" > /etc/hostname
+hostnamectl set-hostname piduino
 ```
 
 * Setup WiFi (optional)
@@ -99,6 +99,7 @@ service avahi-daemon restart
 
 * Install telnet and git
 ```bash
+apt-get update
 apt-get install telnet git
 ```
 
@@ -117,12 +118,13 @@ ln -s /usr/local/bin/run-avrdude /usr/bin/run-avrdude
 
 * Synchronize time and start sketch on boot (optional)
 ```bash
+apt-get install ntpdate
 cat > /etc/rc.local <<EOL
 #!/bin/sh -e
 
-_IP=$(hostname -I) || true
-if [ "$_IP" ]; then
-  printf "My IP address is %s\n" "$_IP"
+_IP=\$(hostname -I) || true
+if [ "\$_IP" ]; then
+  printf "My IP address is %s\n" "\$_IP"
 fi
 
 # Sync Time
