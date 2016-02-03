@@ -44,11 +44,10 @@ sudo su
 ```bash
 passwd
 ```
-- _enter the new root password twice_
+  - _enter the new root password twice_
 ```bash
-nano /etc/ssh/sshd_config
+sed -i "s/PermitRootLogin without-password/PermitRootLogin yes/" /etc/ssh/sshd_config
 ```
-- change _PermitRootLogin_ to _yes_
 
 * Disable Serial Console on boot by changing /boot/cmdline.txt to
 ```bash
@@ -57,9 +56,14 @@ dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=d
 EOL
 ```
 
-* Disable loading sound kernel module by commenting _dtparam=audio=on_ in /boot/config.txt
+* Disable Serial tty
+```bash
+systemctl disable serial-getty@ttyAMA0
 ```
-#dtparam=audio=on
+
+* Disable loading sound kernel module
+```
+sed -i "s/dtparam=audio=on/#dtparam=audio=on/" /boot/config.txt
 ```
 
 * Change the hostname for your Pi (optional)
@@ -128,9 +132,10 @@ if [ "\$_IP" ]; then
 fi
 
 # Sync Time
-ntpdate-debian -u
+ntpdate-debian -u > /dev/null
 # Start Sketch
-/usr/local/bin/run-sketch
+/usr/local/bin/run-sketch > /dev/null
+
 exit 0
 EOL
 ```
@@ -141,7 +146,15 @@ echo "options 8192cu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modpr
 echo "options r8188eu rtw_power_mgnt=0 rtw_enusbss=1 rtw_ips_mode=1" > /etc/modprobe.d/r8188eu.conf
 ```
 
+* Disable screen blank (optional)
+```bash
+sed -i "s/BLANK_TIME=30/BLANK_TIME=0/" /etc/kbd/config
+sed -i "s/POWERDOWN_TIME=30/POWERDOWN_TIME=0/" /etc/kbd/config
+```
+
 * Do not load I2C UART or SPI kernel drivers
+
+* reboot
 
 
 ### If everything went well
