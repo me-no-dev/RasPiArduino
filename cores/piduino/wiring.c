@@ -20,6 +20,7 @@
 #define ARDUINO_MAIN
 
 #include "Arduino.h"
+#include "raspberry_pi_revision.h"
 
 static inline void _halt(uint32_t microseconds){
   uint32_t start = STCLO;
@@ -146,50 +147,6 @@ exit:
     return 1;
 }
 
-static uint32_t getBoardRev(){
-  FILE* f;
-  char buf[1024];
-  char dest[32];
-  int n = 0;
-  int d = 0;
-  int i;
-  uint32_t revision = 0;
-
-  char window[5];
-  int wi = 0;
-  
-  // We must clear the window before use.  Can't assume it is zero.
-  memset(window, 0, sizeof(window));
-
-  if ((f = fopen("/proc/cmdline", "r"))) {
-    n = fread(buf, 1, 1023, f);
-    fclose(f);
-  } else {
-    fprintf(stderr, "Error opening /proc/cmdline\n");
-  }
-  
-  for (i = 0; i < n; ++i) {
-    char c = buf[i];
-    if (strcmp(window, "rev=") == 0) {
-      while (buf[i] != ' ' && buf[i] != 0) {
-        dest[d++] = buf[i++];
-      }
-      dest[d++] = 0;
-      revision = (int)strtol(dest, NULL, 0);
-      return revision;
-    }
-    if (wi < 4) {
-      window[wi++] = c;
-      window[wi] = 0;
-    } else {
-      int win;
-      for (win = 1; win < 4; ++win) window[win-1] = window[win];
-      window[3] = c;
-    }
-  }
-  return revision;
-}
-
 static uint32_t _board_revision = 0;
 
 static void init_pins(){
@@ -208,20 +165,22 @@ void uninit(){
 }
 
 int init(){
-  uint32_t revision = getBoardRev();
-  uint32_t offset = ((revision == 0xa01041 || revision == 0xa21041)?0x1F000000:0);
-  if(revision == 0xa01041)
-    revision = 0x10;//pi2 has B+ pinout
-  else if(revision == 0xa21041 || revision == 0x00900092)
-    revision = 0x13;//pi2 has B+ pinout
-  if(revision >= PINMASKS_LEN || !rpi_model_pinmasks[revision]){
-    fprintf(stderr, "UNKNOWN_REVISION: 0x%08X\n", revision);
+  RASPBERRY_PI_INFO_T info;
+  getRaspberryPiInformation(&info);
+
+  uint32_t offset = info.peripheralBase - 0x20000000;
+
+  if (info.model == RPI_MODEL_B_PI_2 || info.model == RPI_MODEL_ZERO) {
+    info.revisionNumber = 0x10;
+  }
+  if(info.revisionNumber >= PINMASKS_LEN || !rpi_model_pinmasks[info.revisionNumber]){
+    fprintf(stderr, "UNKNOWN_REVISION: 0x%08X\n", info.revisionNumber);
     return 1;
   }
   if(map_registers(offset))
     return 1;
   
-  _board_revision = revision;
+  _board_revision = info.revisionNumber;
   init_pins();
   srand(time(NULL));
   return 0;
