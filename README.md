@@ -1,8 +1,15 @@
 # RasPiArduino [![Build Status](https://travis-ci.org/me-no-dev/RasPiArduino.svg?branch=master)](https://travis-ci.org/me-no-dev/RasPiArduino)
 
 [![Join the chat at https://gitter.im/me-no-dev/RasPiArduino](https://badges.gitter.im/me-no-dev/RasPiArduino.svg)](https://gitter.im/me-no-dev/RasPiArduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-Arduino Framework for RaspberryPI
 
+## Arduino Framework for RaspberryPI
+### Features
+- The familiar Arduino API
+- pinMode/digitalRead/digitalWrite/analogWrite
+- Full SPI, Wire and Serial compatibility
+- Acees to STDIN/STDOUT through the Console class
+- Access to system tty through the TTY library
+- Process, FileIO, Client, Server and UDP implementations through the Bridge library
 
 ### Instructions for Arduino IDE
 * Open the installation folder of Arduino IDE
