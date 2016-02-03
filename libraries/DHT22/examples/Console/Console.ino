@@ -54,7 +54,9 @@ void loop(void)
     case DHT_ERROR_NOT_PRESENT:
       Console.println("Not Present ");
       break;
-    case DHT_ERROR_ACK_TOO_LONG:
+    case DHT_ERROR_ACK_TOO_LONG1:
+    case DHT_ERROR_ACK_TOO_LONG2:
+    case DHT_ERROR_ACK_TOO_LONG3:
       Console.println("ACK time out ");
       break;
     case DHT_ERROR_SYNC_TIMEOUT:
