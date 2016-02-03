@@ -46,7 +46,6 @@ passwd
 ```
 - _enter the new root password twice_
 ```bash
-exit
 nano /etc/ssh/sshd_config
 ```
 - change _PermitRootLogin_ to _yes_
