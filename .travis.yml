@@ -16,7 +16,7 @@ script:
   - cd RaspberryPi
   - ln -s $TRAVIS_BUILD_DIR PiDuino
   - cd PiDuino/tools
-  - wget http://static.ficeto.com/arm-linux-gnueabihf-linux64.tar.gz
+  - wget https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux64.tar.gz
   - tar zxvf arm-linux-gnueabihf-linux64.tar.gz
   - chmod +x arm-linux-gnueabihf/bin/*
   - chmod +x arm-linux-gnueabihf/arm-linux-gnueabihf/bin/*
