@@ -18,7 +18,7 @@
 */
 
 #define ARDUINO_MAIN
-
+#include <errno.h>
 #include "Arduino.h"
 #include "raspberry_pi_revision.h"
 
@@ -139,11 +139,16 @@ static int map_registers(uint32_t reg_offset){
     return 0;
 
 exit:
-    fprintf(stderr, "init_registers failed: %s\n", strerror(errno));
+    if (errno == EACCES) {
+      fprintf(stderr, "No permissions to access /dev/mem.  You should probably run as root.\n");
+    } else {
+      fprintf(stderr, "init_registers failed: %s\n", strerror(errno));
+    }
     if (memfd >= 0){
       close(memfd);
       unmap_registers();
     }
+
     return 1;
 }
 
@@ -164,6 +169,9 @@ void uninit(){
   unmap_registers();
 }
 
+/**
+ * @return Return 0 on success and not 1 on failure.
+ */
 int init(){
   RASPBERRY_PI_INFO_T info;
   getRaspberryPiInformation(&info);
