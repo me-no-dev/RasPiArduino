@@ -36,6 +36,9 @@
 #define UNUSEDOK __attribute__((unused))
 //------------------------------------------------------------------------------
 /** Return the number of bytes currently free in RAM. */
+#ifdef RASPI
+static UNUSEDOK int FreeRam(void){ return 1024*1024; }
+#else
 static UNUSEDOK int FreeRam(void) {
   extern int  __bss_end;
   extern int* __brkval;
@@ -51,6 +54,7 @@ static UNUSEDOK int FreeRam(void) {
   }
   return free_memory;
 }
+#endif
 #ifdef __AVR__
 //------------------------------------------------------------------------------
 /**

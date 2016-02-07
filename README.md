@@ -161,7 +161,7 @@ sed -i "s/POWERDOWN_TIME=30/POWERDOWN_TIME=0/" /etc/kbd/config
 #### Selecting the board from the list of ports
 ![Select Pi Port](doc/pi_select.png)
 
-#### Password prompt berfore upload
+#### Password prompt before upload
 ![Enter Pi Pass](doc/pi_pass.png)
 
 #### Monitoring the sketch
