@@ -20,7 +20,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <linux/tcp.h>
+#include <netinet/tcp.h>
 #include <sys/ioctl.h>
 #include <sys/epoll.h>
 #include "BridgeServer.h"
