@@ -93,7 +93,7 @@ int main(int argc, char **argv){
     pthread_detach(_loop_thread);
   }
   usleep(1000);
-  while(_loop_is_running){
+  while(_keep_sketch_running){
     console_run();
     uart_check_fifos();
     idemonitor_run();
