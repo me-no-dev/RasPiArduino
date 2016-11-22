@@ -11,7 +11,7 @@ private:
   IPAddress multicast_ip;
   IPAddress remote_ip;
   uint16_t remote_port;
-  char buffer[1500];
+  char buffer[1460];
   size_t buffer_len;
   cbuf * rx_buffer;
 public:

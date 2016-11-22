@@ -20,4 +20,5 @@ typedef char __FlashStringHelper;
 #define pgm_read_dword_far(addr) pgm_read_dword(addr)
 #define pgm_read_float_far(addr) pgm_read_float(addr)
 
+#define memcpy_P(to,from,len) memcpy(to,from,len)
 #endif
