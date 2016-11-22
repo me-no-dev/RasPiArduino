@@ -97,7 +97,7 @@
 // | A | 00-03 | PCB Revision | (the pcb revision number)                  |
 // | B | 04-11 | Model name   | A, B, A+, B+, B Pi2, Alpha, Compute Module |
 // |   |       |              | unknown, unknown, Zero                     |
-// | C | 12-15 | Processor    | BCM2835, BCM2836                           |
+// | C | 12-15 | Processor    | BCM2835, BCM2836, BCM2837                  |
 // | D | 16-19 | Manufacturer | Sony, Egoman, Embest, unknown, Embest      |
 // | E | 20-22 | Memory size  | 256 MB, 512 MB, 1024 MB                    |
 // | F | 23-23 | encoded flag | (if set, revision is a bit field)          |
@@ -135,6 +135,15 @@
 // C - Processor - 0 (BCM2835)
 // D - Manufacturer - 0 (Sony)
 // E - Memory - 1 (512 MB)
+// F - Endcoded flag - 1 (encoded cpu info)
+//
+// Revision    : A02082
+//
+// A - PCB Revision - 2 (first revision)
+// B - Model Name - 8 (Model B Pi 3)
+// C - Processor - 2 (BCM2837)
+// D - Manufacturer - 0 (Sony)
+// E - Memory - 2 (1024 MB)
 // F - Endcoded flag - 1 (encoded cpu info)
 //
 //-------------------------------------------------------------------------
@@ -177,7 +186,8 @@ static RASPBERRY_PI_MEMORY_T bitFieldToMemory[] =
 static RASPBERRY_PI_PROCESSOR_T bitFieldToProcessor[] =
 {
     RPI_BROADCOM_2835,
-    RPI_BROADCOM_2836
+    RPI_BROADCOM_2836,
+    RPI_BROADCOM_2837
 };
 
 //-------------------------------------------------------------------------
@@ -220,7 +230,7 @@ static RASPBERRY_PI_MODEL_T bitFieldToModel[] =
     RPI_MODEL_ALPHA,
     RPI_COMPUTE_MODULE,
     RPI_MODEL_UNKNOWN,
-    RPI_MODEL_UNKNOWN,
+    RPI_MODEL_B_PI_3,
     RPI_MODEL_ZERO
 };
 
@@ -545,6 +555,11 @@ getRaspberryPiInformationForRevision(
 
             info->peripheralBase = RPI_BROADCOM_2836_PERIPHERAL_BASE;
             break;
+
+        case RPI_BROADCOM_2837:
+
+            info->peripheralBase = RPI_BROADCOM_2837_PERIPHERAL_BASE;
+            break;
         }
     }
 
@@ -602,6 +617,11 @@ raspberryPiProcessorToString(
     case RPI_BROADCOM_2836:
 
         string = "Broadcom BCM2836";
+        break;
+
+    case RPI_BROADCOM_2837:
+
+        string = "Broadcom BCM2837";
         break;
 
     default:
@@ -688,6 +708,11 @@ raspberryPiModelToString(
     case RPI_MODEL_ZERO:
 
         string = "Model Zero";
+        break;
+
+    case RPI_MODEL_B_PI_3:
+
+        string = "Model B Pi 3";
         break;
 
     default:

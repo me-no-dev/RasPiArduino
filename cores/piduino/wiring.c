@@ -178,7 +178,7 @@ int init(){
 
   uint32_t offset = info.peripheralBase - 0x20000000;
 
-  if (info.model == RPI_MODEL_B_PI_2 || info.model == RPI_MODEL_ZERO) {
+  if (info.model == RPI_MODEL_B_PI_3 || info.model == RPI_MODEL_B_PI_2 || info.model == RPI_MODEL_ZERO) {
     info.revisionNumber = 0x10;
   }
   if(info.revisionNumber >= PINMASKS_LEN || !rpi_model_pinmasks[info.revisionNumber]){
