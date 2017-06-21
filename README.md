@@ -29,7 +29,7 @@ git clone https://github.com/me-no-dev/RasPiArduino piduino
   - Mac OS X: [arm-linux-gnueabihf](https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-osx.tar.gz)
 * Restart Arduino IDE and select the RaspberryPI from the list of boards
 * Compile a sketch
-* Select the RespberryPi from the list of Ports (will show the IP address)
+* Select the RaspberryPi from the list of Ports (will show the IP address)
 * Upload your sketch and see it go
 
 
