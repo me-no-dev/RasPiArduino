@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include "Arduino.h"
 
+#define SPI_HAS_TRANSACTION
+
 //AVR Arduino compatibility
 #define SPI_CLOCK_DIV2 SPI0F2DIV(8000000)
 #define SPI_CLOCK_DIV4 SPI0F2DIV(4000000)
