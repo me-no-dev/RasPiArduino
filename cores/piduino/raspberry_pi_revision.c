@@ -65,7 +65,7 @@
 //     |   0012   |    A+   |    1    | 256 MB |   Sony      |
 //     |   0013   |    B+   |    1    | 512 MB |   Embest    |
 //     |   0014   | compute |    1    | 512 MB |   Sony      |
-//     |   0015   |    A+   |    1    | 256 MB |   Sony      |
+//     |   0015   |    A+   |    1    | 512 MB |   Sony      |
 //     +----------+---------+---------+--------+-------------+
 //
 // If the Raspberry Pi has been over-volted (voiding the warranty) the
@@ -96,9 +96,10 @@
 // +---+-------+--------------+--------------------------------------------+
 // | A | 00-03 | PCB Revision | (the pcb revision number)                  |
 // | B | 04-11 | Model name   | A, B, A+, B+, B Pi2, Alpha, Compute Module |
-// |   |       |              | unknown, unknown, Zero                     |
+// |   |       |              | unknown, unknown, Zero, Compute Module 3   |
+// |   |       |              | unknown, Zero W                            |
 // | C | 12-15 | Processor    | BCM2835, BCM2836, BCM2837                  |
-// | D | 16-19 | Manufacturer | Sony, Egoman, Embest, unknown, Embest      |
+// | D | 16-19 | Manufacturer | Sony, Egoman, Embest, Sony Japan, Embest   |
 // | E | 20-22 | Memory size  | 256 MB, 512 MB, 1024 MB                    |
 // | F | 23-23 | encoded flag | (if set, revision is a bit field)          |
 // | G | 24-24 | waranty bit  | (if set, warranty void - Pre Pi2)          |
@@ -171,23 +172,23 @@ static RASPBERRY_PI_MEMORY_T revisionToMemory[] =
     RPI_256MB,          // 12
     RPI_512MB,          // 13
     RPI_512MB,          // 14
-    RPI_256MB           // 15
+    RPI_512MB           // 15
 };
 
 static RASPBERRY_PI_MEMORY_T bitFieldToMemory[] =
 {
-    RPI_256MB,
-    RPI_512MB,
-    RPI_1024MB
+    RPI_256MB, // 0
+    RPI_512MB, // 1
+    RPI_1024MB // 2
 };
 
 //-------------------------------------------------------------------------
 
 static RASPBERRY_PI_PROCESSOR_T bitFieldToProcessor[] =
 {
-    RPI_BROADCOM_2835,
-    RPI_BROADCOM_2836,
-    RPI_BROADCOM_2837
+    RPI_BROADCOM_2835, // 0
+    RPI_BROADCOM_2836, // 1
+    RPI_BROADCOM_2837  // 2
 };
 
 //-------------------------------------------------------------------------
@@ -222,16 +223,19 @@ static RASPBERRY_PI_I2C_DEVICE_T revisionToI2CDevice[] =
 
 static RASPBERRY_PI_MODEL_T bitFieldToModel[] =
 {
-    RPI_MODEL_A,
-    RPI_MODEL_B,
-    RPI_MODEL_A_PLUS,
-    RPI_MODEL_B_PLUS,
-    RPI_MODEL_B_PI_2,
-    RPI_MODEL_ALPHA,
-    RPI_COMPUTE_MODULE,
-    RPI_MODEL_UNKNOWN,
-    RPI_MODEL_B_PI_3,
-    RPI_MODEL_ZERO
+    RPI_MODEL_A,          // 0
+    RPI_MODEL_B,          // 1
+    RPI_MODEL_A_PLUS,     // 2
+    RPI_MODEL_B_PLUS,     // 3
+    RPI_MODEL_B_PI_2,     // 4
+    RPI_MODEL_ALPHA,      // 5
+    RPI_COMPUTE_MODULE,   // 6
+    RPI_MODEL_UNKNOWN,    // 7
+    RPI_MODEL_B_PI_3,     // 8
+    RPI_MODEL_ZERO,       // 9
+    RPI_COMPUTE_MODULE_3, // A
+    RPI_MODEL_UNKNOWN,    // B
+    RPI_MODEL_ZERO_W      // C
 };
 
 static RASPBERRY_PI_MODEL_T revisionToModel[] =
@@ -264,11 +268,11 @@ static RASPBERRY_PI_MODEL_T revisionToModel[] =
 
 static RASPBERRY_PI_MANUFACTURER_T bitFieldToManufacturer[] =
 {
-    RPI_MANUFACTURER_SONY,
-    RPI_MANUFACTURER_EGOMAN,
-    RPI_MANUFACTURER_EMBEST,
-    RPI_MANUFACTURER_UNKNOWN,
-    RPI_MANUFACTURER_EMBEST
+    RPI_MANUFACTURER_SONY,       // 0
+    RPI_MANUFACTURER_EGOMAN,     // 1
+    RPI_MANUFACTURER_EMBEST,     // 2
+    RPI_MANUFACTURER_SONY_JAPAN, // 3
+    RPI_MANUFACTURER_EMBEST      // 4
 };
 
 static RASPBERRY_PI_MANUFACTURER_T revisionToManufacturer[] =
@@ -560,6 +564,11 @@ getRaspberryPiInformationForRevision(
 
             info->peripheralBase = RPI_BROADCOM_2837_PERIPHERAL_BASE;
             break;
+
+        default:
+
+            info->peripheralBase = RPI_PERIPHERAL_BASE_UNKNOWN;
+            break;
         }
     }
 
@@ -715,6 +724,16 @@ raspberryPiModelToString(
         string = "Model B Pi 3";
         break;
 
+    case RPI_COMPUTE_MODULE_3:
+
+        string = "Compute Module 3";
+        break;
+
+    case RPI_MODEL_ZERO_W:
+
+        string = "Model Zero W";
+        break;
+
     default:
 
         break;
@@ -751,6 +770,11 @@ raspberryPiManufacturerToString(
     case RPI_MANUFACTURER_EMBEST:
 
         string = "Embest";
+        break;
+
+    case RPI_MANUFACTURER_SONY_JAPAN:
+
+        string = "Sony Japan";
         break;
 
     default:
