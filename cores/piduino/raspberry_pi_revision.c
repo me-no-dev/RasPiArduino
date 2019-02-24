@@ -147,6 +147,15 @@
 // E - Memory - 2 (1024 MB)
 // F - Endcoded flag - 1 (encoded cpu info)
 //
+// Revision    : A020D3
+//
+// A - PCB Revision - 3 (first revision)
+// B - Model Name - D (Model B Pi 3)
+// C - Processor - 0 (BCM2835)
+// D - Manufacturer - 0 (Sony)
+// E - Memory - 2 (1024 MB)
+// F - Endcoded flag - 1 (encoded cpu info)
+//
 //-------------------------------------------------------------------------
 
 static RASPBERRY_PI_MEMORY_T revisionToMemory[] =
@@ -235,7 +244,8 @@ static RASPBERRY_PI_MODEL_T bitFieldToModel[] =
     RPI_MODEL_ZERO,       // 9
     RPI_COMPUTE_MODULE_3, // A
     RPI_MODEL_UNKNOWN,    // B
-    RPI_MODEL_ZERO_W      // C
+    RPI_MODEL_ZERO_W,     // C
+    RPI_MODEL_B_PI_3_PLUS // D
 };
 
 static RASPBERRY_PI_MODEL_T revisionToModel[] =
@@ -732,6 +742,11 @@ raspberryPiModelToString(
     case RPI_MODEL_ZERO_W:
 
         string = "Model Zero W";
+        break;
+
+    case RPI_MODEL_B_PI_3_PLUS:
+
+        string = "Model B Pi 3+";
         break;
 
     default:
