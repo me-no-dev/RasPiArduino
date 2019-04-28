@@ -46,6 +46,10 @@ uint32_t analogWriteSetup(uint32_t frequency, uint32_t range){
   _pwm_real_freq = 19200000/(div*range);
   analogWriteRange(range);
   analogWriteDiv(div);
+  if(!_pwm_has_started){
+    _pwm_has_started = 1;
+    PWMCTL = 0;
+  }
   return _pwm_real_freq;
 }
 
