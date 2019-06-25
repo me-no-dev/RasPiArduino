@@ -1,4 +1,5 @@
 #!/bin/bash
+#telnet wrapper to allow Arduino IDE to connect to us
 RUNNING=`ps ax | grep bin/telnet | grep -v grep | wc -l`
 PID=$$
 

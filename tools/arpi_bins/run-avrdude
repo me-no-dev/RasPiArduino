@@ -1,10 +1,12 @@
 #!/bin/bash
-
-SKETCH="/tmp/sketch.bin"
-DESTBIN="/usr/local/bin/arduino-sketch"
-
+#called by Arduino IDE usually to upload the HEX to the MCU
+#here we use it to start the sketch
 LOGFILE="/run/sketch.log"
+SKETCH="/tmp/sketch.bin"
+
 BINNAME="arduino-sketch"
+DESTBIN="/usr/local/bin/$BINNAME"
+
 
 PIDS=`ps ax | grep telnet | grep -v grep | awk '{print $1}'`
 for pid in $PIDS; do

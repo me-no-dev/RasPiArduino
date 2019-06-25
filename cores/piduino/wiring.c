@@ -36,7 +36,7 @@ void sleepMicroseconds(uint32_t m){
 }
 
 void delay(uint32_t m){
-  while(m--) usleep(1000);
+  usleep(m * 1000);
 }
 
 void delayMicroseconds(uint32_t m){
@@ -178,11 +178,11 @@ int init(){
 
   uint32_t offset = info.peripheralBase - 0x20000000;
 
-  if (info.model == RPI_MODEL_B_PI_3 || info.model == RPI_MODEL_B_PI_2 || info.model == RPI_MODEL_ZERO) {
+  if (info.model > RPI_MODEL_B) {
     info.revisionNumber = 0x10;
   }
   if(info.revisionNumber >= PINMASKS_LEN || !rpi_model_pinmasks[info.revisionNumber]){
-    fprintf(stderr, "UNKNOWN_REVISION: 0x%08X\n", info.revisionNumber);
+    fprintf(stderr, "UNKNOWN_REVISION: 0x%08X, MODEL: 0x%08X\n", info.revisionNumber, info.model);
     return 1;
   }
   if(map_registers(offset))

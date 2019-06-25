@@ -2,6 +2,8 @@
 
 [![Join the chat at https://gitter.im/me-no-dev/RasPiArduino](https://badges.gitter.im/me-no-dev/RasPiArduino.svg)](https://gitter.im/me-no-dev/RasPiArduino?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+### Includes [raspberry_pi_revision from Andrew Duncan](https://github.com/AndrewFromMelbourne/raspberry_pi_revision)
+
 ## Arduino Framework for RaspberryPI
 ### Features
 - The familiar Arduino API
@@ -45,16 +47,13 @@ sudo su
 passwd
 ```
   - _enter the new root password twice_
+  - Edit `/etc/ssh/sshd_config` and make sure that the following lines exist and are not commented
 ```bash
-sed -i "s/PermitRootLogin without-password/PermitRootLogin yes/" /etc/ssh/sshd_config
+PermitRootLogin yes
+PasswordAuthentication yes
 ```
 
-* Disable Serial Console on boot by changing /boot/cmdline.txt to
-```bash
-cat > /boot/cmdline.txt <<EOL
-dwc_otg.lpm_enable=0 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
-EOL
-```
+* Disable Serial Console on boot by removing `console=/dev/ttyAMA0` from /boot/cmdline.txt (or through raspi-config)
 
 * Disable Serial tty
 ```bash
@@ -66,7 +65,7 @@ systemctl disable serial-getty@ttyAMA0
 sed -i "s/dtparam=audio=on/#dtparam=audio=on/" /boot/config.txt
 ```
 
-* Change the hostname for your Pi (optional)
+* Change the hostname for your Pi (optional) (also through raspi-config)
 ```bash
 hostnamectl set-hostname piduino
 ```

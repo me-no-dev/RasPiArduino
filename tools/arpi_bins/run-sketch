@@ -1,18 +1,20 @@
 #!/bin/bash
+#can be used to start a sketch
+LOGFILE="/run/sketch.log"
+BINNAME="arduino-sketch"
+DESTBIN="/usr/local/bin/$BINNAME"
 
-DESTBIN="/usr/local/bin/arduino-sketch"
-if [ -f "$DESTBIN" ]; then
-  
-  PIDS=`ps ax | grep telnet | grep -v grep | awk '{print $1}'`
-  for pid in $PIDS; do
-    echo "KILLING: $pid"
-    kill -9 $pid > /dev/null 2>&1
-    sleep 1
-  done
-  
-  killall arduino-sketch > /dev/null 2>&1
-  cd /
-  $DESTBIN >> /run/sketch.log 2>&1 &
-else
+if [ ! -f "$DESTBIN" ]; then
   exit 1;
 fi
+  
+PIDS=`ps ax | grep telnet | grep -v grep | awk '{print $1}'`
+for pid in $PIDS; do
+  echo "KILLING: $pid"
+  kill -9 $pid > /dev/null 2>&1
+  sleep 1
+done
+
+killall $BINNAME > /dev/null 2>&1
+cd /
+$DESTBIN >> $LOGFILE 2>&1 &

@@ -1,3 +1,5 @@
+menu.SerialDestination=Serial to Console
+menu.GDBDebug=Enable gdb
 
 ##############################################################
 bplus.name=RaspberryPI B+/2
@@ -7,15 +9,16 @@ bplus.upload.verbose=
 bplus.upload.speed=115200
 
 bplus.build.mcu=bplus
-bplus.build.f_cpu=700000000L
-bplus.build.board=RASPI
 bplus.build.core=piduino
 bplus.build.variant=bplus
+bplus.build.board=RASPI
+
+bplus.build.f_cpu=700000000L
 bplus.build.debug_flags=
 bplus.build.optimization_flags=-O3
+bplus.build.extra_flags=-DRASPIå
 
 ##############################################################
-menu.SerialDestination=Serial to Console
 bplus.menu.SerialDestination.disabled=Disabled
 bplus.menu.SerialDestination.disabled.build.extra_flags=-DRASPI
 bplus.menu.SerialDestination.enabled=Enabled
@@ -27,7 +30,6 @@ bplus.menu.SerialDestination.enabled.build.extra_flags=-DRASPI -DSERIAL_TO_CONSO
 # compile with or without the "-g" flag.  Adding the "-g" flag includes symbolic debugging.
 # The symbol "build.debug_flags" get set based on the value the user selects.
 #
-menu.GDBDebug=Enable gdb
 bplus.menu.GDBDebug.disabled=Disabled
 bplus.menu.GDBDebug.disabled.build.debug_flags=
 bplus.menu.GDBDebug.disabled.build.optimization_flags=-O3
