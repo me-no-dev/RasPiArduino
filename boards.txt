@@ -3,6 +3,7 @@ menu.GDBDebug=Enable gdb
 
 ##############################################################
 bplus.name=RaspberryPI B+/2
+bplus.upload.via_ssh=true
 
 bplus.upload.tool=scp
 bplus.upload.verbose=

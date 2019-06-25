@@ -49,7 +49,6 @@ void console_flush(void);
 void console_write(uint8_t str);
 int console_available(void);
 
-
 #ifdef __cplusplus
 }
 
@@ -60,14 +59,14 @@ class LinuxConsole : public Stream{
   protected:
     
   public:
-    LinuxConsole(BridgeClass &_b){}
-    void buffer(uint8_t size){}
+    LinuxConsole(BridgeClass &_b __attribute__((unused))){}
+    void buffer(uint8_t size __attribute__((unused))){}
     void noBuffer(){}
     bool connected(){return true;}
     
     inline LinuxConsole(){}
     void begin();
-    inline void begin(uint32_t baud){}
+    inline void begin(uint32_t baud __attribute__((unused))){}
     void end();
     virtual int available(void);
     virtual int peek(void);

@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #define ARDUINO_MAIN
 #include <errno.h>
@@ -23,30 +23,30 @@
 #include "raspberry_pi_revision.h"
 
 static inline void _halt(uint32_t microseconds){
-  uint32_t start = STCLO;
-  uint32_t compare = start + microseconds;
-  if(compare < start)
-    while(STCLO - compare);
-  else
-    while(STCLO < compare);
+    uint32_t start = STCLO;
+    uint32_t compare = start + microseconds;
+    if(compare < start)
+        while(STCLO - compare);
+    else
+        while(STCLO < compare);
 }
 
 void sleepMicroseconds(uint32_t m){
-  usleep(m);
+    usleep(m);
 }
 
 void delay(uint32_t m){
-  usleep(m * 1000);
+    usleep(m * 1000);
 }
 
 void delayMicroseconds(uint32_t m){
-  if(m < 1000)
-    return _halt(m);
-  usleep(m);
+    if(m < 1000)
+        return _halt(m);
+    usleep(m);
 }
 
-void analogReference(uint8_t mode){}
-int analogRead(uint8_t pin){ return 0; }
+void analogReference(uint8_t mode __attribute__((unused))){}
+int analogRead(uint8_t pin __attribute__((unused))){ return 0; }
 
 /*
  * CORE INIT AND CLOSE
@@ -138,58 +138,43 @@ static int map_registers(uint32_t reg_offset){
 
     return 0;
 
-exit:
+    exit:
     if (errno == EACCES) {
-      fprintf(stderr, "No permissions to access /dev/mem.  You should probably run as root.\n");
+        fprintf(stderr, "No permissions to access /dev/mem.  You should probably run as root.\n");
     } else {
-      fprintf(stderr, "init_registers failed: %s\n", strerror(errno));
+        fprintf(stderr, "init_registers failed: %s\n", strerror(errno));
     }
     if (memfd >= 0){
-      close(memfd);
-      unmap_registers();
+        close(memfd);
+        unmap_registers();
     }
 
     return 1;
 }
 
-static uint32_t _board_revision = 0;
-
-static void init_pins(){
-  uint32_t pinmask = rpi_model_pinmasks[_board_revision];
-  int i;
-  for(i=0;i<32;i++){
-    if((pinmask & (1 << i))){
-      pinMode(i,INPUT);
-    }
-  }
-}
-
 void uninit(){
-  init_pins();
-  unmap_registers();
+    unmap_registers();
 }
 
 /**
  * @return Return 0 on success and not 1 on failure.
  */
 int init(){
-  RASPBERRY_PI_INFO_T info;
-  getRaspberryPiInformation(&info);
+    RASPBERRY_PI_INFO_T info;
+    getRaspberryPiInformation(&info);
 
-  uint32_t offset = info.peripheralBase - 0x20000000;
+    uint32_t offset = info.peripheralBase - 0x20000000;
 
-  if (info.model > RPI_MODEL_B) {
-    info.revisionNumber = 0x10;
-  }
-  if(info.revisionNumber >= PINMASKS_LEN || !rpi_model_pinmasks[info.revisionNumber]){
-    fprintf(stderr, "UNKNOWN_REVISION: 0x%08X, MODEL: 0x%08X\n", info.revisionNumber, info.model);
-    return 1;
-  }
-  if(map_registers(offset))
-    return 1;
-  
-  _board_revision = info.revisionNumber;
-  init_pins();
-  srand(time(NULL));
-  return 0;
+    if (info.model > RPI_MODEL_B) {
+        info.revisionNumber = 0x10;
+    }
+    if(info.revisionNumber >= PINMASKS_LEN || !rpi_model_pinmasks[info.revisionNumber]){
+        fprintf(stderr, "UNKNOWN_REVISION: 0x%08X, MODEL: 0x%08X\n", info.revisionNumber, info.model);
+        return 1;
+    }
+    if(map_registers(offset))
+        return 1;
+
+    srand(time(NULL));
+    return 0;
 }

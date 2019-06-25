@@ -467,7 +467,7 @@ getRaspberryPiInformationForRevision(
 
         if (revision != 0)
         {
-            size_t maxOriginalRevision = (sizeof(revisionToModel) /
+            int maxOriginalRevision = (sizeof(revisionToModel) /
                                          sizeof(revisionToModel[0])) - 1;
 
             // remove warranty bit
@@ -485,7 +485,7 @@ getRaspberryPiInformationForRevision(
                     info->warrantyBit = 1;
                 }
 
-                int memoryIndex = (revision & 0x700000) >> 20;
+                size_t memoryIndex = (revision & 0x700000) >> 20;
                 size_t knownMemoryValues = sizeof(bitFieldToMemory)
                                          / sizeof(bitFieldToMemory[0]);
 
@@ -498,7 +498,7 @@ getRaspberryPiInformationForRevision(
                     info->memory = RPI_MEMORY_UNKNOWN;
                 }
 
-                int processorIndex = (revision & 0xF000) >> 12;
+                size_t processorIndex = (revision & 0xF000) >> 12;
                 size_t knownProcessorValues = sizeof(bitFieldToProcessor)
                                             / sizeof(bitFieldToProcessor[0]);
                 if (processorIndex < knownProcessorValues)
@@ -516,7 +516,7 @@ getRaspberryPiInformationForRevision(
 
                 info->i2cDevice = RPI_I2C_1;
 
-                int modelIndex = (revision & 0xFF0) >> 4;
+                size_t modelIndex = (revision & 0xFF0) >> 4;
                 size_t knownModelValues = sizeof(bitFieldToModel)
                                         / sizeof(bitFieldToModel[0]);
 
@@ -529,7 +529,7 @@ getRaspberryPiInformationForRevision(
                     info->model = RPI_MODEL_UNKNOWN;
                 }
 
-                int madeByIndex = (revision & 0xF0000) >> 16;
+                size_t madeByIndex = (revision & 0xF0000) >> 16;
                 size_t knownManufacturerValues = sizeof(bitFieldToManufacturer)
                                                / sizeof(bitFieldToManufacturer[0]);
 

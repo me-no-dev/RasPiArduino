@@ -76,8 +76,9 @@ recipe.size.regex.data=^(?:\.data|\.rodata|\.bss)\s+([0-9]+).*
 # ------------------------------
 
 tools.scp.cmd=echo
-tools.scp.cmd.windows=echo
+tools.scp.network_cmd={runtime.platform.path}/tools/upload.sh
 tools.scp.upload.protocol=esp
 tools.scp.upload.params.verbose=-vv
 tools.scp.upload.params.quiet=
 tools.scp.upload.pattern="{cmd}" "Upload" "{build.path}/{build.project_name}.bin"
+tools.scp.upload.network_pattern={network_cmd} {serial.port} {network.port} {network.password} {build.path}/{build.project_name}.bin

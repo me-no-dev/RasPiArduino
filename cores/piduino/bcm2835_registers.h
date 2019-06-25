@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #ifndef BCM2835_REGISTERS_H
 #define BCM2835_REGISTERS_H
@@ -31,23 +31,19 @@
 #include <string.h>
 
 /*
-00000000-1bffffff  System RAM
-00008000-005727b3  Kernel code
-00598000-0067c3df  Kernel data
 20000000-20000fff  bcm2708_vcio
 20003000-20003fff  bcm2708_systemtimer
 20006000-20006fff  bcm2708_usb
 20007000-20007fff  bcm2708_dma
 20100000-201000ff  bcm2708_powerman.0
 20101098-2010109a  bcm2708-i2s.0
-20200000-20200fff  bcm2708_gpio  *
-20201000-20201fff  uart-pl011    *
+20200000-20200fff  bcm2708_gpio
+20201000-20201fff  uart-pl011
 20203000-20203020  bcm2708-i2s.0
-20204000-202040ff  bcm2708_spi.0 *
-20205000-202050ff  bcm2708_i2c.0 *
+20204000-202040ff  bcm2708_spi.0
+20205000-202050ff  bcm2708_i2c.0
 20300000-203000ff  bcm2708_sdhci.0
-20300000-203000ff  mmc0
-20804000-208040ff  bcm2708_i2c.1 *
+20804000-208040ff  bcm2708_i2c.1
 20980000-2099ffff  bcm2708_usb
 */
 
@@ -247,7 +243,7 @@
 #define PWMMSEN2        15 // Channel 2 M/S Enable
 #define PWMUSEF2        13 // Channel 2 Use Fifo
 #define PWMPOLA2        12 // Channel 2 Polarity
-#define PWMSBIT2        11 // Channel 2 Silence Bit (Defines the state of the output when no transmission takes place)
+#define PWMSBIT2        11 // Channel 2 Idle Level (Defines the state of the output when no transmission takes place)
 #define PWMRPTL2        10 // Channel 2 Repeat Last Data (1: Last data in FIFO is transmitted repetedly until FIFO is not empty)
 #define PWMMODE2        9  // Channel 2 Mode (0: PWM/ 1: Serial)
 #define PWMPWEN2        8  // Channel 2 Enable
@@ -255,7 +251,7 @@
 #define PWMCLRF1        5  // Clear Fifo
 #define PWMUSEF1        5  // Channel 1 Use Fifo
 #define PWMPOLA1        4  // Channel 1 Polarity
-#define PWMSBIT1        3  // Channel 1 Silence Bit
+#define PWMSBIT1        3  // Channel 1 Idle Level
 #define PWMRPTL1        2  // Channel 1 Repeat Last Data
 #define PWMMODE1        1  // Channel 1 Mode
 #define PWMPWEN1        0  // Channel 1 Enable
@@ -659,7 +655,7 @@
 #define PIPLUS_PINMASK   0x0FFFFFFC // GPIO PINS available on PI A+/B+
 #define PINMASKS_LEN     20
 
-const static uint32_t rpi_model_pinmasks[] = {
+static const uint32_t rpi_model_pinmasks[] = {
     0,              // 0x00 Not a board
     0,              // 0x01 Not a board
     PIONE_PINMASK,  // 0x02 Model B Revision 1.0
@@ -702,32 +698,32 @@ extern "C" {
 #endif
 
 static inline uint32_t border_get(volatile uint32_t reg){
-  uint32_t data = *(&reg);
-  *(&reg);
-  return data;
+    uint32_t data = *(&reg);
+    *(&reg);
+    return data;
 }
 
 static inline void border_set(volatile uint32_t reg, uint32_t value){
-  *(&reg) = value;
-  *(&reg) = value;
+    *(&reg) = value;
+    *(&reg) = value;
 }
 
 static inline void border_set_mask(volatile uint32_t reg, uint32_t mask){
-  *(&reg) |= mask;
-  *(&reg) |= mask;
+    *(&reg) |= mask;
+    *(&reg) |= mask;
 }
 
 static inline void border_clr_mask(volatile uint32_t reg, uint32_t mask){
-  *(&reg) &= ~mask;
-  *(&reg) &= ~mask;
+    *(&reg) &= ~mask;
+    *(&reg) &= ~mask;
 }
 
 static inline void border_set_bit(volatile uint32_t reg, uint8_t bit){
-  border_set_mask(reg, 1 << bit);
+    border_set_mask(reg, 1 << bit);
 }
 
 static inline void border_clr_bit(volatile uint32_t reg, uint8_t bit){
-  border_clr_mask(reg, 1 << bit);
+    border_clr_mask(reg, 1 << bit);
 }
 
 #ifdef __cplusplus

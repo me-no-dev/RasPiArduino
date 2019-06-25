@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #include <Arduino.h>
 #include <IPAddress.h>
@@ -98,9 +98,9 @@ IPAddress& IPAddress::operator=(uint32_t address)
 }
 
 bool IPAddress::operator==(const uint8_t* addr) const
-{
+    {
     return memcmp(addr, _address.bytes, sizeof(_address.bytes)) == 0;
-}
+    }
 
 size_t IPAddress::printTo(Print& p) const
 {

@@ -15,7 +15,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -27,7 +27,7 @@
 #include "idemonitor.h"
 
 void LinuxConsole::begin(){
-  console_begin();
+    console_begin();
 }
 
 void LinuxConsole::end(){
@@ -35,31 +35,31 @@ void LinuxConsole::end(){
 }
 
 int LinuxConsole::available(void){
-  return idemonitor_available() + console_available();
+    return idemonitor_available() + console_available();
 }
 
 int LinuxConsole::peek(void){
-  if(idemonitor_connected() && idemonitor_available())
-    return idemonitor_peek();
-  return console_peek();
+    if(idemonitor_connected() && idemonitor_available())
+        return idemonitor_peek();
+    return console_peek();
 }
 
 int LinuxConsole::read(void){
-  if(idemonitor_connected() && idemonitor_available())
-    return idemonitor_read_char();
-  return console_read();
+    if(idemonitor_connected() && idemonitor_available())
+        return idemonitor_read_char();
+    return console_read();
 }
 
 void LinuxConsole::flush(){
-  idemonitor_flush();
-  console_flush();
+    idemonitor_flush();
+    console_flush();
 }
 
 size_t LinuxConsole::write(uint8_t c){
-  if(idemonitor_connected())
-    idemonitor_write((char*)&c, 1);
-  console_write(c);
-  return 1;
+    if(idemonitor_connected())
+        idemonitor_write((char*)&c, 1);
+    console_write(c);
+    return 1;
 }
 
 LinuxConsole Console;

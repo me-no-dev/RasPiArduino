@@ -1,6 +1,6 @@
 /*
  noniso.cpp - replacements for non-ISO functions used by Arduino core
- Copyright © 2016 Ivan Grokhotkov
+ Copyright ï¿½ 2016 Ivan Grokhotkov
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -11,7 +11,7 @@
  
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
-*/
+ */
 
 
 #include <stdlib.h>
