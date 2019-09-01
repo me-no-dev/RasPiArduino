@@ -36,7 +36,7 @@ function print_size_info()
 
     elf_name=$(basename $elf_file)
     sketch_name="${elf_name%.*}"
-    # echo $sketch_name
+    echo $sketch_name
     declare -A segments
     while read -a tokens; do
         seg=${tokens[0]}
@@ -48,7 +48,7 @@ function print_size_info()
             echo "segments[$seg]=$size"
         fi
     done < <($EXAMPLES_SIZE_BIN --format=sysv $elf_file)
-
+    echo ""
     # total_ram=$((${segments[dram0data]} + ${segments[dram0bss]}))
     # total_flash=$((${segments[iram0text]} + ${segments[flashtext]} + ${segments[dram0data]} + ${segments[flashrodata]}))
     # printf "%-32s %-8d   %-8d   %-8d     %-8d   %-8d     %-8d %-8d\n" $sketch_name ${segments[iram0text]} ${segments[flashtext]} ${segments[flashrodata]} ${segments[dram0data]} ${segments[dram0bss]} $total_ram $total_flash
@@ -161,12 +161,15 @@ function build_sketches()
     return 0
 }
 
+echo -e "travis_fold:start:prep_arduino_ide"
 # Install Arduino IDE
 wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
 tar xf arduino.tar.xz
 mv arduino-nightly $HOME/arduino_ide
 mkdir -p $HOME/Arduino/libraries
+echo -e "travis_fold:end:prep_arduino_ide"
 
+echo -e "travis_fold:start:prep_core"
 # Prepare Core and Download Toolchain
 mkdir -p $HOME/Arduino/hardware/RaspberryPi
 cd $HOME/Arduino/hardware/RaspberryPi
@@ -177,7 +180,15 @@ tar zxf arm-linux-gnueabihf-linux64.tar.gz && rm arm-linux-gnueabihf-linux64.tar
 chmod +x arm-linux-gnueabihf/bin/*
 chmod +x arm-linux-gnueabihf/arm-linux-gnueabihf/bin/*
 cd $TRAVIS_BUILD_DIR
+echo -e "travis_fold:end:prep_core"
 
+echo -e "travis_fold:start:test_arduino_ide"
 # Build Examples
 build_sketches $CHUNK_INDEX $CHUNKS_CNT
 if [ $? -ne 0 ]; then exit 1; fi
+echo -e "travis_fold:end:test_arduino_ide"
+
+echo -e "travis_fold:start:size_report"
+cat size.log
+echo -e "travis_fold:end:size_report"
+
