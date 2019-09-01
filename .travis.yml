@@ -3,28 +3,39 @@ language: bash
 os:
   - linux
 
-script:
-  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16
-  - sleep 3
-  - export DISPLAY=:1.0
-  - wget http://downloads.arduino.cc/arduino-1.6.5-linux64.tar.xz
-  - tar xf arduino-1.6.5-linux64.tar.xz
-  - mv arduino-1.6.5 $HOME/arduino_ide
-  - export PATH="$HOME/arduino_ide:$PATH"
-  - which arduino
-  - cd $HOME/arduino_ide/hardware
-  - mkdir RaspberryPi
-  - cd RaspberryPi
-  - ln -s $TRAVIS_BUILD_DIR piduino
-  - cd piduino/tools
-  - wget https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux64.tar.gz
-  - tar zxvf arm-linux-gnueabihf-linux64.tar.gz
-  - chmod +x arm-linux-gnueabihf/bin/*
-  - chmod +x arm-linux-gnueabihf/arm-linux-gnueabihf/bin/*
-  - arduino --board RaspberryPi:piduino:bplus --save-prefs
-  - arduino --get-pref sketchbook.path
-  - source $TRAVIS_BUILD_DIR/travis/common.sh
-  - build_sketches arduino $TRAVIS_BUILD_DIR piduino
+git:
+  depth: false
+
+stages:
+  - build
+
+jobs:
+  include:
+
+    - name: "Build Arduino 0"
+      if: tag IS blank AND (type = pull_request OR (type = push AND branch = master))
+      stage: build
+      script: $TRAVIS_BUILD_DIR/travis/run-examples.sh 0 5
+
+    - name: "Build Arduino 1"
+      if: tag IS blank AND (type = pull_request OR (type = push AND branch = master))
+      stage: build
+      script: $TRAVIS_BUILD_DIR/travis/run-examples.sh 1 5
+
+    - name: "Build Arduino 2"
+      if: tag IS blank AND (type = pull_request OR (type = push AND branch = master))
+      stage: build
+      script: $TRAVIS_BUILD_DIR/travis/run-examples.sh 2 5
+
+    - name: "Build Arduino 3"
+      if: tag IS blank AND (type = pull_request OR (type = push AND branch = master))
+      stage: build
+      script: $TRAVIS_BUILD_DIR/travis/run-examples.sh 3 5
+
+    - name: "Build Arduino 4"
+      if: tag IS blank AND (type = pull_request OR (type = push AND branch = master))
+      stage: build
+      script: $TRAVIS_BUILD_DIR/travis/run-examples.sh 4 5
 
 notifications:
   email:
