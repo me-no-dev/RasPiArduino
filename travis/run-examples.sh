@@ -16,14 +16,38 @@ if [ "$CHUNK_INDEX" -ge "$CHUNKS_CNT" ]; then
 	exit 1
 fi
 
-export ARDUINO_BOARD_FQBN="RaspberryPi:piduino:bplus:SerialDestination=enabled,GDBDebug=disabled"
+echo -e "travis_fold:start:prep_arduino_ide"
+# Install Arduino IDE
+wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
+tar xf arduino.tar.xz
+mv arduino-nightly $HOME/arduino_ide
+mkdir -p $HOME/Arduino/libraries
+echo -e "travis_fold:end:prep_arduino_ide"
+
+echo -e "travis_fold:start:prep_core"
+# Prepare Core and Download Toolchain
+# This should be the only platform specific code
+mkdir -p $HOME/Arduino/hardware/RaspberryPi
+cd $HOME/Arduino/hardware/RaspberryPi
+ln -s $TRAVIS_BUILD_DIR piduino
+cd piduino/tools
+wget https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux64.tar.gz
+tar zxf arm-linux-gnueabihf-linux64.tar.gz && rm arm-linux-gnueabihf-linux64.tar.gz
+chmod +x arm-linux-gnueabihf/bin/*
+chmod +x arm-linux-gnueabihf/arm-linux-gnueabihf/bin/*
+export PLATFORM_FQBN="RaspberryPi:piduino:bplus:SerialDestination=enabled,GDBDebug=disabled"
+export PLATFORM_SIZE_BIN=$TRAVIS_BUILD_DIR/tools/arm-linux-gnueabihf/bin/arm-linux-gnueabihf-size
+export PLATFORM_EXAMPLES=$TRAVIS_BUILD_DIR/libraries
+# End of platform specific code
+echo -e "travis_fold:end:prep_core"
+
+cd $TRAVIS_BUILD_DIR
+
 export ARDUINO_IDE_PATH=$HOME/arduino_ide
 export ARDUINO_USR_PATH=$HOME/Arduino
-export EXAMPLES_PATH=$TRAVIS_BUILD_DIR/libraries
-export EXAMPLES_BUILD_DIR=$HOME/build.tmp
-export EXAMPLES_CACHE_DIR=$HOME/cache.tmp
-export EXAMPLES_BUILD_CMD="$ARDUINO_IDE_PATH/arduino-builder -compile -logger=human -core-api-version=\"10810\" -hardware \"$ARDUINO_IDE_PATH/hardware\" -hardware \"$ARDUINO_USR_PATH/hardware\" -tools \"$ARDUINO_IDE_PATH/tools-builder\" -built-in-libraries \"$ARDUINO_IDE_PATH/libraries\" -libraries \"$ARDUINO_USR_PATH/libraries\" -fqbn=$ARDUINO_BOARD_FQBN -warnings=\"all\" -build-cache \"$EXAMPLES_CACHE_DIR\" -build-path \"$EXAMPLES_BUILD_DIR\""
-export EXAMPLES_SIZE_BIN=$TRAVIS_BUILD_DIR/tools/arm-linux-gnueabihf/bin/arm-linux-gnueabihf-size
+export ARDUINO_BUILD_DIR=$HOME/build.tmp
+export ARDUINO_CACHE_DIR=$HOME/cache.tmp
+export ARDUINO_BUILD_CMD="$ARDUINO_IDE_PATH/arduino-builder -compile -logger=human -core-api-version=\"10810\" -hardware \"$ARDUINO_IDE_PATH/hardware\" -hardware \"$ARDUINO_USR_PATH/hardware\" -tools \"$ARDUINO_IDE_PATH/tools-builder\" -built-in-libraries \"$ARDUINO_IDE_PATH/libraries\" -libraries \"$ARDUINO_USR_PATH/libraries\" -fqbn=$PLATFORM_FQBN -warnings=\"all\" -build-cache \"$ARDUINO_CACHE_DIR\" -build-path \"$ARDUINO_BUILD_DIR\" -verbose"
 
 function print_size_info()
 {
@@ -45,7 +69,7 @@ function print_size_info()
         if [ "$addr" -eq "$addr" -a "$addr" -ne "0" ] 2>/dev/null; then
             segments[$seg]=$size
         fi
-    done < <($EXAMPLES_SIZE_BIN --format=sysv $elf_file)
+    done < <($PLATFORM_SIZE_BIN --format=sysv $elf_file)
     total_ram=$((${segments[data]} + ${segments[bss]}))
     total_flash=$((${segments[text]} + ${segments[rodata]}))
     printf "%-32s %-8d   %-8d   %-8d   %-8d   %-8d %-8d\n" $sketch_name ${segments[text]} ${segments[rodata]} ${segments[data]} ${segments[bss]} $total_ram $total_flash
@@ -56,8 +80,8 @@ function build_sketch()
 {
 	local sketch=$1
     echo -e "\n------------ Building $sketch ------------\n";
-    rm -rf $EXAMPLES_BUILD_DIR/*
-    time ($EXAMPLES_BUILD_CMD $sketch >build.log)
+    rm -rf $ARDUINO_BUILD_DIR/*
+    time ($ARDUINO_BUILD_CMD $sketch >build.log)
     local result=$?
     if [ $result -ne 0 ]; then
         echo "Build failed ($1)"
@@ -71,7 +95,7 @@ function build_sketch()
 
 function count_sketches()
 {
-    local sketches=$(find $EXAMPLES_PATH -name *.ino)
+    local sketches=$(find $PLATFORM_EXAMPLES -name *.ino)
     local sketchnum=0
     rm -rf sketches.txt
     for sketch in $sketches; do
@@ -89,8 +113,8 @@ function count_sketches()
 
 function build_sketches()
 {
-    mkdir -p $EXAMPLES_BUILD_DIR
-    mkdir -p $EXAMPLES_CACHE_DIR
+    mkdir -p $ARDUINO_BUILD_DIR
+    mkdir -p $ARDUINO_CACHE_DIR
     mkdir -p $ARDUINO_USR_PATH/libraries
     mkdir -p $ARDUINO_USR_PATH/hardware
     
@@ -153,31 +177,10 @@ function build_sketches()
         if [ $result -ne 0 ]; then
             return $result
         fi
-        print_size_info $EXAMPLES_BUILD_DIR/*.bin >>size.log
+        print_size_info $ARDUINO_BUILD_DIR/*.bin >>size.log
     done
     return 0
 }
-
-echo -e "travis_fold:start:prep_arduino_ide"
-# Install Arduino IDE
-wget -O arduino.tar.xz https://www.arduino.cc/download.php?f=/arduino-nightly-linux64.tar.xz
-tar xf arduino.tar.xz
-mv arduino-nightly $HOME/arduino_ide
-mkdir -p $HOME/Arduino/libraries
-echo -e "travis_fold:end:prep_arduino_ide"
-
-echo -e "travis_fold:start:prep_core"
-# Prepare Core and Download Toolchain
-mkdir -p $HOME/Arduino/hardware/RaspberryPi
-cd $HOME/Arduino/hardware/RaspberryPi
-ln -s $TRAVIS_BUILD_DIR piduino
-cd piduino/tools
-wget https://github.com/me-no-dev/RasPiArduino/releases/download/0.0.1/arm-linux-gnueabihf-linux64.tar.gz
-tar zxf arm-linux-gnueabihf-linux64.tar.gz && rm arm-linux-gnueabihf-linux64.tar.gz
-chmod +x arm-linux-gnueabihf/bin/*
-chmod +x arm-linux-gnueabihf/arm-linux-gnueabihf/bin/*
-cd $TRAVIS_BUILD_DIR
-echo -e "travis_fold:end:prep_core"
 
 echo -e "travis_fold:start:test_arduino_ide"
 # Build Examples
