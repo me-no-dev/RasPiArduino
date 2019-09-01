@@ -71,6 +71,24 @@ function build_sketch()
     return 0
 }
 
+function count_sketches()
+{
+    local sketches=$(find $EXAMPLES_PATH -name *.ino)
+    local sketchnum=0
+    rm -rf sketches.txt
+    for sketch in $sketches; do
+        local sketchdir=$(dirname $sketch)
+        local sketchdirname=$(basename $sketchdir)
+        local sketchname=$(basename $sketch)
+        if [[ "${sketchdirname}.ino" != "$sketchname" ]]; then
+            continue
+        fi
+        echo $sketch >> sketches.txt
+        sketchnum=$(($sketchnum + 1))
+    done
+    return $sketchnum
+}
+
 function build_sketches()
 {
     mkdir -p $EXAMPLES_BUILD_DIR
