@@ -45,12 +45,13 @@ function print_size_info()
         addr=${tokens[2]}
         if [ "$addr" -eq "$addr" -a "$addr" -ne "0" ] 2>/dev/null; then
             segments[$seg]=$size
+            echo "segments[$seg]=$size"
         fi
     done < <($EXAMPLES_SIZE_BIN --format=sysv $elf_file)
 
-    total_ram=$((${segments[dram0data]} + ${segments[dram0bss]}))
-    total_flash=$((${segments[iram0text]} + ${segments[flashtext]} + ${segments[dram0data]} + ${segments[flashrodata]}))
-    printf "%-32s %-8d   %-8d   %-8d     %-8d   %-8d     %-8d %-8d\n" $sketch_name ${segments[iram0text]} ${segments[flashtext]} ${segments[flashrodata]} ${segments[dram0data]} ${segments[dram0bss]} $total_ram $total_flash
+    # total_ram=$((${segments[dram0data]} + ${segments[dram0bss]}))
+    # total_flash=$((${segments[iram0text]} + ${segments[flashtext]} + ${segments[dram0data]} + ${segments[flashrodata]}))
+    # printf "%-32s %-8d   %-8d   %-8d     %-8d   %-8d     %-8d %-8d\n" $sketch_name ${segments[iram0text]} ${segments[flashtext]} ${segments[flashrodata]} ${segments[dram0data]} ${segments[dram0bss]} $total_ram $total_flash
     return 0
 }
 
