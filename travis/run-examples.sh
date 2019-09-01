@@ -30,13 +30,12 @@ function print_size_info()
     elf_file=$1
 
     if [ -z "$elf_file" ]; then
-        printf "sketch                           iram0.text flash.text flash.rodata dram0.data dram0.bss    dram     flash\n"
+        printf "sketch                           text       rodata     data       bss        dram     flash\n"
         return 0
     fi
 
     elf_name=$(basename $elf_file)
     sketch_name="${elf_name%.*}"
-    echo $sketch_name
     declare -A segments
     while read -a tokens; do
         seg=${tokens[0]}
@@ -45,13 +44,11 @@ function print_size_info()
         addr=${tokens[2]}
         if [ "$addr" -eq "$addr" -a "$addr" -ne "0" ] 2>/dev/null; then
             segments[$seg]=$size
-            echo "segments[$seg]=$size"
         fi
     done < <($EXAMPLES_SIZE_BIN --format=sysv $elf_file)
-    echo ""
-    # total_ram=$((${segments[dram0data]} + ${segments[dram0bss]}))
-    # total_flash=$((${segments[iram0text]} + ${segments[flashtext]} + ${segments[dram0data]} + ${segments[flashrodata]}))
-    # printf "%-32s %-8d   %-8d   %-8d     %-8d   %-8d     %-8d %-8d\n" $sketch_name ${segments[iram0text]} ${segments[flashtext]} ${segments[flashrodata]} ${segments[dram0data]} ${segments[dram0bss]} $total_ram $total_flash
+    total_ram=$((${segments[data]} + ${segments[bss]}))
+    total_flash=$((${segments[text]} + ${segments[rodata]}))
+    printf "%-32s %-8d   %-8d   %-8d   %-8d   %-8d %-8d\n" $sketch_name ${segments[text]} ${segments[rodata]} ${segments[data]} ${segments[bss]} $total_ram $total_flash
     return 0
 }
 
