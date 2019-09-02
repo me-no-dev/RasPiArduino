@@ -609,6 +609,11 @@ getRaspberryPiInformationForRevision(
             info->peripheralBase = RPI_BROADCOM_2837_PERIPHERAL_BASE;
             break;
 
+        case RPI_BROADCOM_2838:
+
+            info->peripheralBase = RPI_BROADCOM_2838_PERIPHERAL_BASE;
+            break;
+
         default:
 
             info->peripheralBase = RPI_PERIPHERAL_BASE_UNKNOWN;
