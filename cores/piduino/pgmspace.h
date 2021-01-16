@@ -25,7 +25,6 @@ typedef char __FlashStringHelper;
 // https://github.com/esp8266/Arduino/blob/85ba53a24994db5ec2aff3b7adfa05330a637413/tests/host/sys/pgmspace.h
 #define strcmp_P strcmp
 #define strncmp_P strncmp
-inline size_t strlen_P(const char *s) { return strlen(s); }
 #define sprintf_P sprintf
 #define printf_P printf
 #endif
