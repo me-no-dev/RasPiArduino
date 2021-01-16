@@ -28,6 +28,14 @@
 #include "pgmspace.h"
 
 #ifdef __cplusplus
+
+// https://github.com/esp8266/Arduino/blob/da138456a6394670540d19aa448c5291c35b2c02/cores/esp8266/Arduino.h#L224
+// https://github.com/esp8266/Arduino/blob/da138456a6394670540d19aa448c5291c35b2c02/cores/esp8266/Arduino.h#L232-L233
+#include <algorithm>
+using std::min;
+using std::max;
+using std::abs;
+
 extern "C"{
 #endif
 
@@ -72,9 +80,11 @@ void yield(void);
 #undef abs
 #endif
 
+#ifndef __cplusplus
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 #define abs(x) ((x)>0?(x):-(x))
+#endif
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
 #define radians(deg) ((deg)*DEG_TO_RAD)
