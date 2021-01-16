@@ -87,7 +87,7 @@ int BridgeUDP::parsePacket(){
   }
   remote_ip = IPAddress(si_other.sin_addr.s_addr);
   remote_port = ntohs(si_other.sin_port);
-  rx_buffer = new cbuf(len);
+  rx_buffer = new cbuf(len+1);
   rx_buffer->write(buf, len);
   return len;
 }
